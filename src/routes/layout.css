@@ -1,0 +1,245 @@
+@import url('https://fonts.googleapis.com/css2?family=Margarine&family=Playpen+Sans:wght@400;500;600;700&display=swap');
+@import 'tailwindcss';
+@custom-variant dark (&:where(.dark, .dark *));
+@plugin '@tailwindcss/forms';
+@plugin '@tailwindcss/typography';
+
+@theme {
+	--font-sans: 'Playpen Sans', 'Comic Sans MS', cursive;
+	--font-handwritten: 'Playpen Sans', 'Comic Sans MS', cursive;
+	--font-nav: 'Playpen Sans', 'Comic Sans MS', cursive;
+	--font-hero: 'Margarine', 'Comic Sans MS', cursive;
+	--color-brand-bg: #fcf7ef;
+	--color-brand-dark: #302b30;
+	--color-brand-pink: #d89aaa;
+	--color-brand-pink-light: #f5ece3;
+}
+
+@layer utilities {
+	.rounded-full { border-radius: 255px 225px 260px 240px / 225px 255px 240px 260px !important; }
+	.rounded-3xl { border-radius: 35px 20px 35px 20px / 20px 35px 20px 35px !important; }
+	.rounded-2xl { border-radius: 26px 15px 26px 15px / 15px 26px 15px 26px !important; }
+	.rounded-xl { border-radius: 21px 12px 21px 12px / 12px 21px 12px 21px !important; }
+	.rounded-lg { border-radius: 14px 8px 14px 8px / 8px 14px 8px 14px !important; }
+}
+
+:root {
+	--theme-origin-x: 28px;
+	--theme-origin-y: 32px;
+	font-family: var(--font-sans);
+	color-scheme: light;
+	background: #fcf7ef;
+	font-synthesis: none;
+	zoom: 1.1;
+}
+
+html {
+	scroll-behavior: smooth;
+	scroll-padding-top: 64px;
+	scrollbar-width: none;
+	-ms-overflow-style: none;
+}
+
+body {
+	margin: 0;
+	min-width: 320px;
+	background: #fcf7ef;
+	transition:
+		background 350ms ease,
+		color 350ms ease;
+}
+
+html.theme-transitioning,
+html.theme-transitioning *,
+html.theme-transitioning *::before,
+html.theme-transitioning *::after {
+	transition: none !important;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+button,
+input,
+select,
+textarea {
+	font: inherit;
+}
+
+*::-webkit-scrollbar {
+	display: none;
+}
+
+html.ganyu-theme {
+	background-color: #edf7fc;
+}
+
+html.ganyu-theme body {
+	background:
+		radial-gradient(circle at 12% 12%, rgba(207, 232, 250, 0.82), transparent 30%),
+		radial-gradient(circle at 88% 25%, rgba(220, 210, 244, 0.62), transparent 28%),
+		linear-gradient(145deg, #f5fbff 0%, #edf7fc 48%, #f5f0ff 100%);
+	color: #263854;
+}
+
+html.ganyu-theme .site-header {
+	border-bottom-color: rgba(83, 119, 157, 0.18);
+	background: rgba(239, 248, 253, 0.9);
+}
+
+html.ganyu-theme .site-header a,
+html.ganyu-theme .theme-toggle {
+	color: #334f73;
+}
+
+html.ganyu-theme .site-header nav a::before {
+	background: radial-gradient(ellipse at center, rgba(142, 185, 220, 0.35) 0%, transparent 70%);
+}
+
+html.ganyu-theme .site-header nav a::after {
+	background-color: transparent;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 10' preserveAspectRatio='none'%3E%3Cpath d='M1,5 C20,3 40,6 60,4 C75,3 90,5 99,4 C80,6 60,7 40,6 C20,5 5,8 1,5 Z' fill='%238eb9dc'/%3E%3C/svg%3E");
+}
+
+html.ganyu-theme .hero-title {
+	color: #385886;
+}
+
+html.ganyu-theme .theme-surface {
+	border-color: rgba(81, 119, 157, 0.24);
+	background: rgba(247, 252, 255, 0.68);
+	box-shadow: 4px 4px 0 rgba(75, 103, 144, 0.06);
+}
+
+.theme-transition-overlay {
+	position: fixed;
+	inset: 0;
+	z-index: 9999;
+	display: block;
+	pointer-events: none;
+}
+
+.theme-transition-overlay.to-ganyu {
+	background:
+		radial-gradient(circle at 12% 12%, rgba(207, 232, 250, 0.98), transparent 30%),
+		radial-gradient(circle at 88% 25%, rgba(220, 210, 244, 0.88), transparent 28%),
+		linear-gradient(145deg, #f5fbff 0%, #edf7fc 48%, #f5f0ff 100%);
+}
+
+.theme-transition-overlay.to-default {
+	background: #fcf7ef;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+	animation: none;
+	mix-blend-mode: normal;
+}
+
+html.transitioning-to-ganyu::view-transition-old(root),
+html.transitioning-to-dark::view-transition-old(root) {
+	z-index: 1;
+}
+
+html.transitioning-to-ganyu::view-transition-new(root),
+html.transitioning-to-dark::view-transition-new(root) {
+	z-index: 2;
+	animation: theme-reveal 850ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+html.transitioning-to-default::view-transition-old(root),
+html.transitioning-to-light::view-transition-old(root) {
+	z-index: 2;
+	animation: theme-close 500ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+html.transitioning-to-default::view-transition-new(root),
+html.transitioning-to-light::view-transition-new(root) {
+	z-index: 1;
+	animation: none;
+}
+
+@keyframes theme-reveal {
+	from {
+		clip-path: circle(0 at var(--theme-origin-x) var(--theme-origin-y));
+	}
+	to {
+		clip-path: circle(150vmax at var(--theme-origin-x) var(--theme-origin-y));
+	}
+}
+
+@keyframes theme-close {
+	from {
+		clip-path: circle(150vmax at var(--theme-origin-x) var(--theme-origin-y));
+	}
+	to {
+		clip-path: circle(0 at var(--theme-origin-x) var(--theme-origin-y));
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	html {
+		scroll-behavior: auto;
+	}
+
+	body {
+		transition: none;
+	}
+
+	::view-transition-old(root),
+	::view-transition-new(root) {
+		animation: none;
+	}
+}
+
+/* Dark Mode Overrides */
+html.dark {
+	color-scheme: dark;
+	background: #1a1a1a;
+}
+html.dark body {
+	background: #1a1a1a;
+	color: #e4e4e7;
+}
+html.dark .site-header {
+	background: rgba(26, 26, 26, 0.94);
+}
+html.dark nav button {
+	color: #a1a1aa;
+}
+html.dark nav button:hover, html.dark nav button.active {
+	color: #f4f4f5;
+}
+html.dark .brand {
+	color: #e4e4e7;
+}
+
+/* Ganyu Dark Mode Overrides */
+html.dark.ganyu-theme {
+	background-color: #0b111e;
+}
+html.dark.ganyu-theme body {
+	background:
+		radial-gradient(circle at 12% 12%, rgba(25, 55, 87, 0.6), transparent 35%),
+		radial-gradient(circle at 88% 25%, rgba(45, 30, 68, 0.5), transparent 30%),
+		linear-gradient(145deg, #0f172a 0%, #090d16 50%, #110e1b 100%);
+	color: #cbd5e1;
+}
+html.dark.ganyu-theme .site-header {
+	background: rgba(9, 13, 22, 0.9);
+	border-bottom-color: rgba(75, 103, 144, 0.2);
+}
+html.dark.ganyu-theme .site-header a,
+html.dark.ganyu-theme .theme-toggle {
+	color: #8bb1e2;
+}
+html.dark.ganyu-theme .theme-surface {
+	border-color: rgba(75, 103, 144, 0.3);
+	background: rgba(15, 23, 42, 0.6);
+	box-shadow: 4px 4px 0 rgba(75, 103, 144, 0.15);
+}
+html.dark.ganyu-theme .hero-title {
+	color: #6398db;
+}
+

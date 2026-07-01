@@ -1,0 +1,11 @@
+"$schema" = "./node_modules/wrangler/config-schema.json"
+name = "new-portfolio-v2"
+pages_build_output_dir = ".svelte-kit/cloudflare"
+compatibility_date = "2026-06-10"
+compatibility_flags = ["nodejs_als"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "portfolio-analytics"
+database_id = "2151bdef-7621-4955-ab6a-63e8b80237b4"
+migrations_dir = "migrations"
