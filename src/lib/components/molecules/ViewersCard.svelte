@@ -1,6 +1,8 @@
 <script lang="ts">
 	import Sparkline from '$lib/components/atoms/Sparkline.svelte';
 	import { onMount } from 'svelte';
+	import { Tween } from 'svelte/motion';
+	import { cubicOut } from 'svelte/easing';
 
 	interface ViewerStats {
 		online: number;
@@ -15,15 +17,30 @@
 	const VISITOR_STORAGE_KEY = 'portfolio:visitor-id';
 
 	let stats = $state<ViewerStats | null>(null);
+	
+	const animatedOnline = new Tween(0, { duration: 1500, easing: cubicOut });
+	const animatedOnPage = new Tween(0, { duration: 1500, easing: cubicOut });
+	const animatedAllTime = new Tween(0, { duration: 1500, easing: cubicOut });
+	const animatedPageViews = new Tween(0, { duration: 1500, easing: cubicOut });
+
+	$effect(() => {
+		if (stats) {
+			animatedOnline.target = stats.online;
+			animatedOnPage.target = stats.onPage;
+			animatedAllTime.target = stats.allTime;
+			animatedPageViews.target = stats.pageViews;
+		}
+	});
 
 	const formatCount = (value: number | undefined) => {
-		if (value === undefined) return '—';
-		if (value < 1000) return value.toLocaleString('en-US');
+		if (value === undefined || value === 0 && !stats) return '—';
+		const rounded = Math.round(value);
+		if (rounded < 1000) return rounded.toLocaleString('en-US');
 
 		return Intl.NumberFormat('en-US', {
 			notation: 'compact',
 			maximumFractionDigits: 1
-		}).format(value);
+		}).format(rounded);
 	};
 
 	onMount(() => {
@@ -98,14 +115,14 @@
 			<div class="text-[10px] font-medium tracking-wider text-[#302b30]/50 dark:text-zinc-400/60 uppercase">
 				Right now
 			</div>
-			<div class="mt-0.5 text-3xl font-bold text-[#302b30] dark:text-zinc-100">{formatCount(stats?.online)}</div>
+			<div class="mt-0.5 text-3xl font-bold text-[#302b30] dark:text-zinc-100">{formatCount(animatedOnline.current)}</div>
 			<div class="text-[10px] text-[#302b30]/40 dark:text-zinc-400/50">on site</div>
 		</div>
 		<div>
 			<div class="text-[10px] font-medium tracking-wider text-[#302b30]/50 dark:text-zinc-400/60 uppercase">
 				This page
 			</div>
-			<div class="mt-0.5 text-3xl font-bold text-[#302b30] dark:text-zinc-100">{formatCount(stats?.onPage)}</div>
+			<div class="mt-0.5 text-3xl font-bold text-[#302b30] dark:text-zinc-100">{formatCount(animatedOnPage.current)}</div>
 			<div class="text-[10px] text-[#302b30]/40 dark:text-zinc-400/50">currently</div>
 		</div>
 	</div>
@@ -117,7 +134,7 @@
 					<span class="mr-1 font-bold text-[#8ac9a6]">✦</span>All time
 				</div>
 				<div class="mt-0.5 text-xl font-bold text-[#302b30] dark:text-zinc-100">
-					{formatCount(stats?.allTime)}
+					{formatCount(animatedAllTime.current)}
 				</div>
 				<div class="text-[10px] text-[#302b30]/40 dark:text-zinc-400/50">total</div>
 			</div>
@@ -130,7 +147,7 @@
 
 		<div class="flex items-center justify-between">
 			<div>
-				<div class="text-xl font-bold text-[#302b30] dark:text-zinc-100">{formatCount(stats?.pageViews)}</div>
+				<div class="text-xl font-bold text-[#302b30] dark:text-zinc-100">{formatCount(animatedPageViews.current)}</div>
 				<div class="text-[10px] text-[#302b30]/40 dark:text-zinc-400/50">this page</div>
 			</div>
 			<Sparkline
