@@ -1,17 +1,23 @@
 import type { D1Database } from '@cloudflare/workers-types';
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { z } from 'zod';
 
 const ACTIVE_WINDOW_SECONDS = 150;
 const HISTORY_DAYS = 14;
 const SITE_PATH = '*';
 const VISITOR_ID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-interface ViewerPayload {
-	visitorId?: unknown;
-	path?: unknown;
-	recordView?: unknown;
-}
+const ViewerPayloadSchema = z.object({
+	visitorId: z.string().regex(VISITOR_ID_PATTERN),
+	path: z.string()
+		.startsWith('/')
+		.transform((val) => {
+			const path = val.split(/[?#]/, 1)[0].slice(0, 200);
+			return path || '/';
+		}),
+	recordView: z.boolean().optional().default(false)
+});
 
 interface ViewerCounts {
 	online: number;
@@ -23,13 +29,6 @@ interface ViewerCounts {
 interface DailyCount {
 	day: string;
 	value: number;
-}
-
-function normalisePath(value: unknown): string | null {
-	if (typeof value !== 'string' || !value.startsWith('/')) return null;
-
-	const path = value.split(/[?#]/, 1)[0].slice(0, 200);
-	return path || '/';
 }
 
 function getRecentDays(now: Date): string[] {
@@ -53,23 +52,20 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		return json({ message: 'D1 binding "DB" is not configured.' }, { status: 503 });
 	}
 
-	let payload: ViewerPayload;
+	let body: unknown;
 
 	try {
-		payload = await request.json();
+		body = await request.json();
 	} catch {
 		return json({ message: 'Invalid JSON body.' }, { status: 400 });
 	}
 
-	const visitorId =
-		typeof payload.visitorId === 'string' && VISITOR_ID_PATTERN.test(payload.visitorId)
-			? payload.visitorId
-			: null;
-	const path = normalisePath(payload.path);
-
-	if (!visitorId || !path) {
-		return json({ message: 'Invalid visitor ID or path.' }, { status: 400 });
+	const parsed = ViewerPayloadSchema.safeParse(body);
+	if (!parsed.success) {
+		return json({ message: 'Invalid visitor ID or path.', errors: parsed.error.format() }, { status: 400 });
 	}
+
+	const { visitorId, path, recordView } = parsed.data;
 
 	const currentDate = new Date();
 	const now = Math.floor(currentDate.getTime() / 1000);
@@ -105,7 +101,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		);
 	}
 
-	if (payload.recordView === true) {
+	if (recordView === true) {
 		writes.push(
 			db
 				.prepare(

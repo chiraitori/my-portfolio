@@ -39,6 +39,7 @@
 	"dependencies": {
 		"jimp": "^1.6.1",
 		"marked": "^18.0.5",
-		"potrace": "^2.1.8"
+		"potrace": "^2.1.8",
+		"zod": "^4.4.3"
 	}
 }
