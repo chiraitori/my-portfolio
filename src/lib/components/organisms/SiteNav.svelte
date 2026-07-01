@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { pushState } from '$app/navigation';
 	import glazelily from '$lib/assets/glazelily.png';
 	import sunIcon from '$lib/assets/sun.svg';
 	import moonIcon from '$lib/assets/moon.svg';
@@ -196,15 +195,11 @@
 
 		const oldURL = window.location.href;
 
-		if (window.location.hash !== href) {
-			pushState(href, {});
-		}
-
 		activeHref = href;
 		window.dispatchEvent(
 			new HashChangeEvent('hashchange', {
 				oldURL,
-				newURL: window.location.href
+				newURL: window.location.origin + window.location.pathname + href
 			})
 		);
 
@@ -298,8 +293,13 @@
 				onclick={(event) => {
 					if (item.href === '#home') {
 						activeHref = '#home';
-						pushState('#home', {});
 						document.getElementById('home')?.scrollIntoView({ behavior: 'smooth' });
+						window.dispatchEvent(
+							new HashChangeEvent('hashchange', {
+								oldURL: window.location.href,
+								newURL: window.location.origin + window.location.pathname + '#home'
+							})
+						);
 					} else {
 						navigateShowcase(item.href, event.detail === 0);
 					}

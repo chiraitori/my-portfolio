@@ -32,12 +32,20 @@
 
 	let stableHeight = $derived(maxStableHeight);
 
-	function syncPanel() {
-		if (window.location.hash === '#projects') {
+	function syncPanel(e?: HashChangeEvent | Event) {
+		let targetHash = window.location.hash;
+		
+		if (e && 'newURL' in e) {
+			try {
+				targetHash = new URL((e as HashChangeEvent).newURL).hash;
+			} catch (err) {}
+		}
+
+		if (targetHash === '#projects') {
 			activePanel = 'projects';
-		} else if (window.location.hash === '#posts') {
+		} else if (targetHash === '#posts') {
 			activePanel = 'posts';
-		} else if (window.location.hash === '#about') {
+		} else if (targetHash === '#about') {
 			activePanel = 'about';
 		}
 	}
