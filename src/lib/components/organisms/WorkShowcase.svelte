@@ -15,22 +15,7 @@
 	let projectsHeight = $state(0);
 	let mounted = $state(false);
 
-	let windowWidth = $state(0);
-	let lastWindowWidth = $state(0);
-	let maxStableHeight = $state(0);
-
 	let currentHeight = $derived(Math.max(aboutHeight, postsHeight, projectsHeight));
-
-	$effect(() => {
-		if (windowWidth !== lastWindowWidth) {
-			maxStableHeight = currentHeight;
-			lastWindowWidth = windowWidth;
-		} else {
-			maxStableHeight = Math.max(maxStableHeight, currentHeight);
-		}
-	});
-
-	let stableHeight = $derived(maxStableHeight);
 
 	function syncPanel(e?: HashChangeEvent | Event) {
 		let targetHash = window.location.hash;
@@ -56,12 +41,12 @@
 	});
 </script>
 
-<svelte:window onhashchange={syncPanel} bind:innerWidth={windowWidth} />
+<svelte:window onhashchange={syncPanel} />
 
 <div
 	class="showcase-viewport"
 	class:mounted
-	style:height={stableHeight > 0 ? `${stableHeight}px` : undefined}
+	style:height={currentHeight > 0 ? `${currentHeight}px` : undefined}
 >
 	<div
 		id="about"
