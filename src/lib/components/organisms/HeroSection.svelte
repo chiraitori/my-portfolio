@@ -75,12 +75,12 @@
 	}
 
 	:global(html.dark) .hero-bg {
-		opacity: 0.55;
+		opacity: 0.85;
 	}
 
 	@media (max-width: 767px) {
 		:global(html.dark) .hero-bg {
-			opacity: 0.42;
+			opacity: 0.7;
 		}
 	}
 
@@ -100,13 +100,13 @@
 		content: '';
 		position: absolute;
 		inset: 0;
-		background: rgba(26, 26, 26, 0.65);
+		background: rgba(26, 26, 26, 0.2);
 		z-index: 1;
 		pointer-events: none;
 	}
 
 	:global(html.dark.ganyu-theme) .image-container::after {
-		background: rgba(9, 13, 22, 0.7);
+		background: rgba(9, 13, 22, 0.2);
 	}
 
 
