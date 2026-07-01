@@ -10,7 +10,9 @@
 				if (localStorage.getItem('portfolio-theme') === 'ganyu') {
 					document.documentElement.classList.add('ganyu-theme');
 				}
-				if (localStorage.getItem('portfolio-dark-mode') === 'true') {
+				
+				const storedDarkMode = localStorage.getItem('portfolio-dark-mode');
+				if (storedDarkMode === 'true' || (storedDarkMode === null && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
 					document.documentElement.classList.add('dark');
 				}
 			} catch (e) {}

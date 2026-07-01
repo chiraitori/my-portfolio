@@ -223,7 +223,10 @@
 	onMount(() => {
 		syncActiveHref();
 		applyTheme(localStorage.getItem('portfolio-theme') === 'ganyu');
-		applyDarkMode(localStorage.getItem('portfolio-dark-mode') === 'true');
+		
+		const storedDarkMode = localStorage.getItem('portfolio-dark-mode');
+		const isDark = storedDarkMode === 'true' || (storedDarkMode === null && window.matchMedia('(prefers-color-scheme: dark)').matches);
+		applyDarkMode(isDark);
 
 		// Scroll-based section detection
 		const sectionIds = ['home', 'about', 'posts', 'projects'];
