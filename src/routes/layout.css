@@ -33,6 +33,12 @@
 	zoom: 1.1;
 }
 
+@media (max-width: 840px) {
+	:root {
+		zoom: 1;
+	}
+}
+
 html {
 	scroll-behavior: smooth;
 	scroll-padding-top: 64px;
@@ -81,25 +87,6 @@ html.ganyu-theme body {
 		radial-gradient(circle at 88% 25%, rgba(220, 210, 244, 0.62), transparent 28%),
 		linear-gradient(145deg, #f5fbff 0%, #edf7fc 48%, #f5f0ff 100%);
 	color: #263854;
-}
-
-html.ganyu-theme .site-header {
-	border-bottom-color: rgba(83, 119, 157, 0.18);
-	background: rgba(239, 248, 253, 0.9);
-}
-
-html.ganyu-theme .site-header a,
-html.ganyu-theme .theme-toggle {
-	color: #334f73;
-}
-
-html.ganyu-theme .site-header nav a::before {
-	background: radial-gradient(ellipse at center, rgba(142, 185, 220, 0.35) 0%, transparent 70%);
-}
-
-html.ganyu-theme .site-header nav a::after {
-	background-color: transparent;
-	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 10' preserveAspectRatio='none'%3E%3Cpath d='M1,5 C20,3 40,6 60,4 C75,3 90,5 99,4 C80,6 60,7 40,6 C20,5 5,8 1,5 Z' fill='%238eb9dc'/%3E%3C/svg%3E");
 }
 
 html.ganyu-theme .hero-title {
@@ -196,50 +183,31 @@ html.transitioning-to-light::view-transition-new(root) {
 /* Dark Mode Overrides */
 html.dark {
 	color-scheme: dark;
-	background: #1a1a1a;
+	background: #19151d;
 }
 html.dark body {
-	background: #1a1a1a;
-	color: #e4e4e7;
+	background:
+		radial-gradient(circle at 14% 10%, rgba(80, 46, 62, 0.28), transparent 32%),
+		radial-gradient(circle at 88% 22%, rgba(62, 49, 83, 0.22), transparent 30%),
+		linear-gradient(145deg, #1b1720 0%, #151219 52%, #1d1721 100%);
+	color: #e9dde3;
 }
-html.dark .site-header {
-	background: rgba(26, 26, 26, 0.94);
-}
-html.dark nav button {
-	color: #a1a1aa;
-}
-html.dark nav button:hover, html.dark nav button.active {
-	color: #f4f4f5;
-}
-html.dark .brand {
-	color: #e4e4e7;
-}
-
 /* Ganyu Dark Mode Overrides */
 html.dark.ganyu-theme {
-	background-color: #0b111e;
+	background-color: #0b1222;
 }
 html.dark.ganyu-theme body {
 	background:
-		radial-gradient(circle at 12% 12%, rgba(25, 55, 87, 0.6), transparent 35%),
-		radial-gradient(circle at 88% 25%, rgba(45, 30, 68, 0.5), transparent 30%),
-		linear-gradient(145deg, #0f172a 0%, #090d16 50%, #110e1b 100%);
-	color: #cbd5e1;
-}
-html.dark.ganyu-theme .site-header {
-	background: rgba(9, 13, 22, 0.9);
-	border-bottom-color: rgba(75, 103, 144, 0.2);
-}
-html.dark.ganyu-theme .site-header a,
-html.dark.ganyu-theme .theme-toggle {
-	color: #8bb1e2;
+		radial-gradient(circle at 12% 12%, rgba(39, 74, 113, 0.46), transparent 35%),
+		radial-gradient(circle at 88% 25%, rgba(50, 46, 92, 0.38), transparent 30%),
+		linear-gradient(145deg, #101a2f 0%, #0b1222 52%, #14142a 100%);
+	color: #d8e4f2;
 }
 html.dark.ganyu-theme .theme-surface {
-	border-color: rgba(75, 103, 144, 0.3);
-	background: rgba(15, 23, 42, 0.6);
-	box-shadow: 4px 4px 0 rgba(75, 103, 144, 0.15);
+	border-color: rgba(129, 169, 215, 0.26);
+	background: rgba(14, 22, 42, 0.62);
+	box-shadow: 4px 4px 0 rgba(129, 169, 215, 0.12);
 }
 html.dark.ganyu-theme .hero-title {
-	color: #6398db;
+	color: #8fb8ea;
 }
-

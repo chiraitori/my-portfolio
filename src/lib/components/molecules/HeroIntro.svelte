@@ -1,16 +1,18 @@
-<div class="z-10 flex flex-col gap-6">
+<div class="hero-intro z-10 flex flex-col gap-6">
 	<div class="flex flex-col gap-2">
 		<h1 class="hero-title select-none">
 			Hi there~ <br />
 			I'm Chiraitori~
 		</h1>
-		<p class="font-handwritten mt-4 text-2xl text-[#302b30] dark:text-zinc-200 select-none md:text-3xl">
+		<p
+			class="hero-subtitle font-handwritten mt-4 text-2xl text-[#302b30] dark:text-zinc-200 select-none md:text-3xl"
+		>
 			<span class="line-through decoration-2">IoT Developer</span> <br />
 			<span class="hero-highlight">Hardware Muncher :)</span>
 		</p>
 	</div>
 
-	<div class="mt-2 flex items-center gap-4">
+	<div class="hero-actions mt-2 flex items-center gap-4">
 		<a
 			href="#about"
 			class="hand-drawn-btn btn-yellow px-7 py-3 font-semibold text-[#302b30]"
@@ -39,7 +41,7 @@
 		</a>
 	</div>
 
-	<div class="mt-4 flex flex-col gap-3 text-current/80 sm:flex-row sm:items-center sm:gap-4">
+	<div class="hero-connect mt-4 flex flex-col gap-3 text-current/80 sm:flex-row sm:items-center sm:gap-4">
 		<span class="text-sm font-medium">Let's connect</span>
 		<div class="flex flex-wrap items-center gap-3">
 			<a
@@ -159,6 +161,7 @@
 <style>
 	.hero-title {
 		margin: 0;
+		max-width: 100%;
 		color: #202747;
 		font-family: var(--font-hero);
 		font-size: 62px;
@@ -202,6 +205,11 @@
 	.hand-drawn-btn {
 		position: relative;
 		z-index: 1;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		text-align: center;
+		white-space: nowrap;
 		transition: transform 150ms ease;
 	}
 
@@ -288,8 +296,60 @@
 	}
 
 	@media (max-width: 767px) {
+		.hero-intro {
+			gap: 1.25rem;
+			max-width: min(100%, 21rem);
+		}
+
 		.hero-title {
-			font-size: clamp(40px, 11vw, 52px);
+			font-size: clamp(2.2rem, 10vw, 2.65rem);
+			line-height: 1.08;
+		}
+
+		.hero-subtitle {
+			margin-top: 0.75rem;
+			font-size: clamp(1.35rem, 6vw, 1.5rem);
+			line-height: 1.25;
+		}
+
+		.hero-actions {
+			flex-wrap: wrap;
+			gap: 0.75rem;
+		}
+
+		.hand-drawn-btn {
+			min-width: min(100%, 8.75rem);
+			padding: 0.72rem 1.2rem;
+			font-size: 0.95rem;
+			line-height: 1.25;
+		}
+
+		.hero-connect {
+			margin-top: 0.75rem;
+		}
+	}
+
+	@media (max-width: 600px) {
+		.hero-intro {
+			max-width: min(100%, 20rem);
+		}
+
+		.hero-title {
+			font-size: clamp(2.15rem, 9vw, 2.6rem);
+		}
+
+		.hero-actions {
+			width: 100%;
+			max-width: 22rem;
+			gap: 0.875rem;
+		}
+
+		.hand-drawn-btn {
+			flex: 1 1 0;
+			min-width: 0;
+			padding: 0.8rem 0.5rem;
+			font-size: 0.9rem;
+			white-space: nowrap;
 		}
 	}
 </style>

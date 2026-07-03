@@ -94,8 +94,62 @@
 	}
 
 	@media (max-width: 767px) {
+		.hero-banner {
+			min-height: min(720px, calc(100dvh - 76px));
+			align-items: flex-start;
+		}
+
+		.image-container {
+			bottom: -1.5rem;
+			mask-image: linear-gradient(
+				to bottom,
+				transparent 0%,
+				black 12%,
+				black 68%,
+				transparent 100%
+			);
+			-webkit-mask-image: linear-gradient(
+				to bottom,
+				transparent 0%,
+				black 12%,
+				black 68%,
+				transparent 100%
+			);
+		}
+
+		.default-bg {
+			object-position: 42% bottom;
+		}
+
+		.ganyu-bg {
+			object-position: 82% 52%;
+		}
+
+		.hero-bg {
+			mask-image: linear-gradient(
+				to right,
+				transparent 0%,
+				rgba(0, 0, 0, 0.3) 15%,
+				rgba(0, 0, 0, 0.8) 35%,
+				black 60%,
+				black 85%,
+				rgba(0, 0, 0, 0.4) 95%,
+				transparent 100%
+			);
+			-webkit-mask-image: linear-gradient(
+				to right,
+				transparent 0%,
+				rgba(0, 0, 0, 0.3) 15%,
+				rgba(0, 0, 0, 0.8) 35%,
+				black 60%,
+				black 85%,
+				rgba(0, 0, 0, 0.4) 95%,
+				transparent 100%
+			);
+		}
+
 		.hero-text {
-			padding: 24px 16px;
+			padding: clamp(72px, 12dvh, 96px) 16px 96px;
 		}
 	}
 

@@ -258,7 +258,9 @@
 			if (el) observer.observe(el);
 		}
 
-		return () => observer.disconnect();
+		return () => {
+			observer.disconnect();
+		};
 	});
 </script>
 
@@ -395,7 +397,7 @@
 			onclick={(event) => {
 				if (item.href === '#home') {
 					activeHref = '#home';
-					pushState('#home', {});
+					window.history.pushState({}, '', '#home');
 					document.getElementById('home')?.scrollIntoView({ behavior: 'smooth' });
 				} else {
 					navigateShowcase(item.href, event.detail === 0);
@@ -461,6 +463,7 @@
 		min-height: 64px;
 		padding: 0 28px;
 		background: rgba(252, 247, 239, 0.94);
+		border-bottom: 1px solid rgba(48, 43, 48, 0.08);
 		backdrop-filter: blur(12px);
 	}
 
@@ -652,7 +655,7 @@
 		display: none;
 	}
 
-	@media (max-width: 680px) {
+	@media (max-width: 840px) {
 		.site-header {
 			grid-template-columns: auto 1fr;
 			padding: 0 14px;
@@ -670,12 +673,14 @@
 
 		.mobile-bottom-nav {
 			position: fixed;
-			bottom: 20px;
+			bottom: calc(20px + env(safe-area-inset-bottom, 0px));
 			left: 50%;
 			transform: translateX(-50%);
 			z-index: 40;
 			display: flex;
+			width: min(calc(100vw - 48px), 320px);
 			align-items: center;
+			justify-content: space-between;
 			gap: 4px;
 			background: rgba(252, 247, 239, 0.85);
 			backdrop-filter: blur(16px);
@@ -688,21 +693,29 @@
 		}
 
 		:global(html.dark) .mobile-bottom-nav {
-			background: rgba(26, 26, 26, 0.85);
-			border-color: #e4e4e7;
-			box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+			background: rgba(31, 27, 35, 0.9);
+			border-color: rgba(226, 185, 198, 0.64);
+			box-shadow:
+				0 14px 34px rgba(7, 6, 10, 0.48),
+				0 0 26px rgba(216, 154, 170, 0.1),
+				0 1px 0 rgba(255, 239, 244, 0.08) inset;
 		}
 
 		:global(html.ganyu-theme) .mobile-bottom-nav {
-			background: rgba(237, 247, 252, 0.85);
-			border-color: #4b6790;
-			box-shadow: 0 8px 30px rgba(117, 157, 202, 0.15);
+			background: rgba(239, 248, 253, 0.88);
+			border-color: rgba(75, 103, 144, 0.72);
+			box-shadow:
+				0 10px 28px rgba(117, 157, 202, 0.2),
+				0 1px 0 rgba(255, 255, 255, 0.5) inset;
 		}
 
 		:global(html.dark.ganyu-theme) .mobile-bottom-nav {
-			background: rgba(9, 13, 22, 0.85);
-			border-color: rgba(75, 103, 144, 0.3);
-			box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
+			background: rgba(14, 22, 42, 0.9);
+			border-color: rgba(151, 190, 232, 0.68);
+			box-shadow:
+				0 14px 34px rgba(3, 8, 18, 0.5),
+				0 0 26px rgba(129, 169, 215, 0.14),
+				0 1px 0 rgba(207, 229, 255, 0.12) inset;
 		}
 
 		.mobile-bottom-nav button {
@@ -712,21 +725,22 @@
 			justify-content: center;
 			background: transparent;
 			border: none;
-			padding: 6px 14px;
+			flex: 1 1 0;
+			min-width: 0;
+			padding: 6px clamp(4px, 2.4vw, 12px);
 			gap: 3px;
 			color: #39333a;
 			cursor: pointer;
 			position: relative;
 			transition: color 180ms ease, transform 150ms ease;
-			min-width: 68px;
 		}
 
 		:global(html.dark) .mobile-bottom-nav button {
-			color: #a1a1aa;
+			color: #d8cbd3;
 		}
 
 		:global(html.dark) .mobile-bottom-nav button.active {
-			color: #f4f4f5;
+			color: #fff7fa;
 		}
 
 		:global(html.ganyu-theme) .mobile-bottom-nav button {
@@ -738,11 +752,11 @@
 		}
 
 		:global(html.dark.ganyu-theme) .mobile-bottom-nav button {
-			color: #8bb1e2;
+			color: #b8cbe7;
 		}
 
 		:global(html.dark.ganyu-theme) .mobile-bottom-nav button.active {
-			color: #e2f0fd;
+			color: #f7fbff;
 		}
 
 		.mobile-bottom-nav button::before {
@@ -767,11 +781,11 @@
 		}
 
 		:global(html.dark) .mobile-bottom-nav button::before {
-			background: rgba(244, 244, 245, 0.08);
+			background: rgba(216, 154, 170, 0.18);
 		}
 
 		:global(html.dark.ganyu-theme) .mobile-bottom-nav button::before {
-			background: rgba(139, 177, 226, 0.15);
+			background: rgba(129, 169, 215, 0.22);
 		}
 
 		.mobile-bottom-nav svg {
@@ -808,7 +822,23 @@
 
 	/* Ganyu Theme Overrides */
 	:global(html.ganyu-theme) .site-header {
-		background: rgba(237, 247, 252, 0.94);
+		background: rgba(239, 248, 253, 0.94);
+		border-bottom-color: rgba(75, 103, 144, 0.16);
+		box-shadow: 0 1px 0 rgba(255, 255, 255, 0.45) inset;
+	}
+
+	:global(html.ganyu-theme) .brand,
+	:global(html.ganyu-theme) .theme-toggle {
+		color: #365f92;
+	}
+
+	:global(html.ganyu-theme) nav button {
+		color: #3d5f83;
+	}
+
+	:global(html.ganyu-theme) nav button:hover,
+	:global(html.ganyu-theme) nav button.active {
+		color: #1e416a;
 	}
 
 	:global(html.ganyu-theme) nav button::before {
@@ -830,51 +860,65 @@
 
 	/* Dark Mode Overrides */
 	:global(html.dark) .site-header {
-		background: rgba(26, 26, 26, 0.94);
+		background: rgba(25, 21, 29, 0.94);
+		border-bottom-color: rgba(226, 185, 198, 0.16);
+		box-shadow:
+			0 1px 0 rgba(255, 239, 244, 0.05) inset,
+			0 10px 28px rgba(7, 6, 10, 0.24);
 	}
 	:global(html.dark) nav button {
-		color: #a1a1aa;
+		color: #d8cbd3;
 	}
 	:global(html.dark) nav button:hover {
-		color: #f4f4f5;
+		color: #fff7fa;
 	}
 	:global(html.dark) nav button.active {
-		color: #f4f4f5;
+		color: #fff7fa;
+		text-shadow: 0 0 14px rgba(216, 154, 170, 0.42);
 	}
 	:global(html.dark) .brand {
-		color: #e4e4e7;
+		color: #f4dfe7;
+		text-shadow: 0 0 14px rgba(216, 154, 170, 0.18);
+	}
+
+	:global(html.dark) .theme-toggle {
+		color: #f4dfe7;
 	}
 
 	/* Ganyu Dark Mode Overrides */
 	:global(html.dark.ganyu-theme) .site-header {
-		background: rgba(9, 13, 22, 0.94);
-		border-bottom: 1px solid rgba(75, 103, 144, 0.2);
+		background: rgba(11, 18, 34, 0.96);
+		border-bottom: 1px solid rgba(151, 190, 232, 0.24);
+		box-shadow:
+			0 1px 0 rgba(207, 229, 255, 0.08) inset,
+			0 10px 26px rgba(3, 8, 18, 0.28);
 	}
 	:global(html.dark.ganyu-theme) nav button {
-		color: #8bb1e2;
+		color: #b8cbe7;
 	}
 	:global(html.dark.ganyu-theme) nav button:hover {
-		color: #cbd5e1;
+		color: #f7fbff;
 	}
 	:global(html.dark.ganyu-theme) nav button.active {
-		color: #e2f0fd;
-		text-shadow: 0 0 12px rgba(139, 177, 226, 0.4);
+		color: #f7fbff;
+		text-shadow: 0 0 14px rgba(129, 169, 215, 0.52);
 	}
 	:global(html.dark.ganyu-theme) .brand {
-		color: #cbd5e1;
+		color: #c8def8;
+		text-shadow: 0 0 16px rgba(129, 169, 215, 0.34);
 	}
 	:global(html.dark.ganyu-theme) nav button::before {
-		background: radial-gradient(ellipse at center, rgba(117, 157, 202, 0.15) 0%, transparent 70%);
+		background: radial-gradient(ellipse at center, rgba(129, 169, 215, 0.18) 0%, transparent 70%);
 	}
 	:global(html.dark.ganyu-theme) nav button::after {
-		background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 10' preserveAspectRatio='none'%3E%3Cpath d='M1,5 C20,3 40,6 60,4 C75,3 90,5 99,4 C80,6 60,7 40,6 C20,5 5,8 1,5 Z' fill='%238bb1e2'/%3E%3C/svg%3E");
+		background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 10' preserveAspectRatio='none'%3E%3Cpath d='M1,5 C20,3 40,6 60,4 C75,3 90,5 99,4 C80,6 60,7 40,6 C20,5 5,8 1,5 Z' fill='%2381a9d7'/%3E%3C/svg%3E");
 	}
 	:global(html.dark.ganyu-theme) a:focus-visible,
 	:global(html.dark.ganyu-theme) nav button:focus-visible {
-		outline-color: #8bb1e2;
+		outline-color: #81a9d7;
 	}
 	:global(html.dark.ganyu-theme) .theme-toggle {
-		color: #8bb1e2;
+		color: #c8def8;
 	}
 	
 	/* Prevent icon flash (FOUC) */

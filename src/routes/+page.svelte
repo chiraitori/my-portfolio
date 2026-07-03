@@ -231,7 +231,7 @@
 
 <SiteNav />
 
-<main id="home" class="flex min-h-screen flex-col px-[30px] pb-8 md:pb-12">
+<main id="home" class="flex min-h-screen flex-col px-5 pb-32 md:px-[30px] md:pb-12">
 	<div class="grid grid-cols-1 items-start gap-8 lg:grid-cols-[minmax(0,1fr)_280px] lg:gap-12">
 		<!-- Hero Section -->
 		<div class="order-1 lg:col-start-1 lg:row-start-1 flex flex-col min-w-0">
