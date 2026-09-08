@@ -275,7 +275,7 @@
 	<title>chiraitori.dev | Portfolio</title>
 	<meta
 		name="description"
-		content="Hi there! I'm Chiraitori, a tech lead and software engineer. Welcome to my small corner of the internet."
+		content="Hi there! I'm Chiraitori, an IoT student building apps, backend services, Discord bots, AI tools, and embedded projects. Welcome to my small corner of the internet."
 	/>
 </svelte:head>
 
