@@ -2,26 +2,39 @@
 	import HeroIntro from '$lib/components/molecules/HeroIntro.svelte';
 	import heroBanner from '$lib/assets/hero-banner.png';
 	import ganyuBanner from '$lib/assets/ganyu-character.png';
-	import background from '$lib/assets/hero-layers/pastel-background.png';
-	import portraitMask from '$lib/assets/hero-layers/chiraitori-mask.png';
-	import ganyuMask from '$lib/assets/hero-layers/ganyu-mask.png';
+	import { onMount } from 'svelte';
+	let hero: HTMLElement;
+	let paused = $state(false);
+	onMount(() => {
+		let visible = true;
+		const update = () => (paused = !visible || document.hidden);
+		const observer = new IntersectionObserver(([entry]) => {
+			visible = entry.isIntersecting;
+			update();
+		});
+		observer.observe(hero);
+		document.addEventListener('visibilitychange', update);
+		update();
+		return () => {
+			observer.disconnect();
+			document.removeEventListener('visibilitychange', update);
+		};
+	});
 </script>
 
-<section class="hero-section">
+<section class="hero-section" bind:this={hero} class:motion-paused={paused}>
 	<div
 		class="hero-banner"
 		style:--portrait-source={`url('${heroBanner}')`}
 		style:--ganyu-source={`url('${ganyuBanner}')`}
-		style:--portrait-mask={`url('${portraitMask}')`}
-		style:--ganyu-mask={`url('${ganyuMask}')`}
 	>
 		<div class="hero-scene" aria-hidden="true">
-			<img src={background} class="scene-background" alt="" decoding="async" />
-			<div class="scene-character cutout"></div>
+			<div class="artwork-entry"><div class="scene-artwork"></div></div>
 			<svg class="scene-sparkles" viewBox="0 0 1000 560" fill="currentColor">
-				<path
-					d="M450 105q0 9 9 9-9 0-9 9 0-9-9-9 9 0 9-9M810 70q0 7 7 7-7 0-7 7 0-7-7-7 7 0 7-7M880 230q0 10 10 10-10 0-10 10 0-10-10-10 10 0 10-10M370 390q0 7 7 7-7 0-7 7 0-7-7-7 7 0 7-7"
-				/>
+				<path d="M450 105q0 9 9 9-9 0-9 9 0-9-9-9 9 0 9-9" />
+				<path d="M810 70q0 7 7 7-7 0-7 7 0-7-7-7 7 0 7-7" />
+				<path d="M880 230q0 10 10 10-10 0-10 10 0-10-10-10 10 0 10-10" />
+				<path d="M370 390q0 7 7 7-7 0-7 7 0-7-7-7 7 0 7-7" />
 			</svg>
 		</div>
 		<div class="hero-text"><HeroIntro /></div>
@@ -34,7 +47,6 @@
 	}
 	.hero-banner {
 		--art-source: var(--portrait-source);
-		--art-mask: var(--portrait-mask);
 		position: relative;
 		isolation: isolate;
 		overflow: hidden;
@@ -45,7 +57,6 @@
 	}
 	:global(html.ganyu-theme) .hero-banner {
 		--art-source: var(--ganyu-source);
-		--art-mask: var(--ganyu-mask);
 	}
 	.hero-scene {
 		position: absolute;
@@ -53,35 +64,59 @@
 		z-index: -1;
 		pointer-events: none;
 		mask-image:
-			linear-gradient(to right, transparent, #000 35%, #000 90%, transparent),
-			linear-gradient(to bottom, transparent, #000 10%, #000 82%, transparent);
+			linear-gradient(to right, transparent, #000 38%, #000 82%, transparent),
+			linear-gradient(to bottom, transparent, #000 16%, #000 68%, transparent);
 		mask-composite: intersect;
 	}
-	.scene-background {
-		position: absolute;
-		inset: 0;
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-		animation: background-enter 1300ms cubic-bezier(0.16, 1, 0.3, 1) 60ms both;
-	}
-	.cutout {
+	.scene-artwork {
 		position: absolute;
 		inset: 0;
 		background-image: var(--art-source);
 		background-size: cover;
 		background-position: right center;
-		/* Luminance mattes keep the original artwork; all layers share its crop. */
-		mask-image: var(--art-mask);
-		mask-size: cover;
-		mask-position: right center;
-		mask-repeat: no-repeat;
-		mask-mode: luminance;
+		transform-origin: 75% 65%;
+		animation: artwork-breathe 14s ease-in-out infinite alternate;
 	}
-	/* Keep the entire silhouette together: slicing it creates seams during motion. */
-	.scene-character {
-		transform-origin: 75% 80%;
+	.artwork-entry {
+		position: absolute;
+		inset: -6px;
 		animation: character-enter 900ms cubic-bezier(0.16, 1, 0.3, 1) 120ms both;
+	}
+	.scene-sparkles path {
+		transform-box: fill-box;
+		transform-origin: center;
+		animation: shimmer 5s ease-in-out infinite alternate;
+	}
+	.scene-sparkles path:nth-child(2n) {
+		animation-delay: -2s;
+	}
+	@keyframes artwork-breathe {
+		from {
+			transform: scale(1) translateY(0);
+		}
+		to {
+			transform: scale(1.015) translateY(-3px);
+		}
+	}
+	@keyframes shimmer {
+		from {
+			opacity: 0.15;
+			transform: scale(0.65);
+		}
+		to {
+			opacity: 0.8;
+			transform: scale(1.05);
+		}
+	}
+	.motion-paused .scene-artwork,
+	.motion-paused .scene-sparkles path {
+		animation-play-state: paused;
+	}
+	.hero-scene::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(to right, var(--page), transparent 65%);
 	}
 	.scene-sparkles {
 		position: absolute;
@@ -91,11 +126,15 @@
 		color: #fff9ff;
 		animation: sparkles-enter 1100ms ease-out 250ms both;
 	}
-	:global(html.dark) .scene-background {
-		opacity: 0.16;
+	:global(html.dark) .scene-artwork {
+		filter: brightness(0.65) saturate(0.8);
 	}
-	:global(html.dark) .cutout {
-		filter: brightness(0.85) saturate(0.85);
+	:global(html.dark) .hero-scene::after {
+		background: linear-gradient(
+			to right,
+			var(--page),
+			color-mix(in srgb, var(--page) 25%, transparent) 70%
+		);
 	}
 	:global(html.dark) .scene-sparkles {
 		opacity: 0.45;
@@ -106,14 +145,6 @@
 		max-width: 700px;
 		padding: 40px clamp(16px, 3vw, 40px);
 		animation: intro-enter 650ms cubic-bezier(0.16, 1, 0.3, 1) both;
-	}
-	@keyframes background-enter {
-		from {
-			transform: translate(12px, 60px) scale(1.04);
-		}
-		to {
-			transform: none;
-		}
 	}
 	@keyframes character-enter {
 		from {
@@ -164,8 +195,9 @@
 		}
 	}
 	@media (prefers-reduced-motion: reduce) {
-		.scene-background,
-		.scene-character,
+		.artwork-entry,
+		.scene-sparkles path,
+		.scene-artwork,
 		.scene-sparkles,
 		.hero-text {
 			animation: none;
