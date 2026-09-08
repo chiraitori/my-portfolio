@@ -3,70 +3,45 @@
 	import PostsSection from '$lib/components/organisms/PostsSection.svelte';
 	import ProjectsSection from '$lib/components/organisms/ProjectsSection.svelte';
 	import { onMount } from 'svelte';
-	import type { Post } from '$lib/types/portfolio';
+	import type { Post, StatusInfo } from '$lib/types/portfolio';
 
-	let { onSelectPost }: { onSelectPost?: (post: Post) => void } = $props();
+	let { onSelectPost, status }: { onSelectPost?: (post: Post) => void; status: StatusInfo } =
+		$props();
 
 	type Panel = 'about' | 'posts' | 'projects';
 
 	let activePanel = $state<Panel>('posts');
-	let aboutHeight = $state(0);
-	let postsHeight = $state(0);
-	let projectsHeight = $state(0);
-	let mounted = $state(false);
-
-	let currentHeight = $derived(Math.max(aboutHeight, postsHeight, projectsHeight));
-
-	function syncPanel(e?: HashChangeEvent | Event) {
-		let targetHash = window.location.hash;
-		
-		if (e && 'newURL' in e) {
-			try {
-				targetHash = new URL((e as HashChangeEvent).newURL).hash;
-			} catch (err) {}
-		}
-
-		if (targetHash === '#projects') {
-			activePanel = 'projects';
-		} else if (targetHash === '#posts') {
-			activePanel = 'posts';
-		} else if (targetHash === '#about') {
-			activePanel = 'about';
+	let slideDirection = $state(1);
+	function syncPanel() {
+		const hash = window.location.hash;
+		const nextPanel = hash === '#about' ? 'about' : hash === '#projects' ? 'projects' : 'posts';
+		const order: Panel[] = ['about', 'posts', 'projects'];
+		if (nextPanel !== activePanel) {
+			slideDirection = order.indexOf(nextPanel) > order.indexOf(activePanel) ? 1 : -1;
+			activePanel = nextPanel;
 		}
 	}
 
-	onMount(() => {
-		syncPanel();
-		mounted = true;
-	});
+	onMount(syncPanel);
 </script>
 
 <svelte:window onhashchange={syncPanel} />
 
-<div
-	class="showcase-viewport"
-	class:mounted
-	style:height={currentHeight > 0 ? `${currentHeight}px` : undefined}
->
+<div class="showcase-viewport" style:--slide-from={`${slideDirection * 40}px`}>
 	<div
 		id="about"
 		class="showcase-panel"
 		class:active={activePanel === 'about'}
-		class:inactive-left={activePanel !== 'about'}
-		bind:offsetHeight={aboutHeight}
 		aria-hidden={activePanel !== 'about'}
 		inert={activePanel !== 'about'}
 	>
-		<AboutSection />
+		<AboutSection {status} />
 	</div>
 
 	<div
 		id="posts"
 		class="showcase-panel"
 		class:active={activePanel === 'posts'}
-		class:inactive-left={activePanel === 'projects'}
-		class:inactive-right={activePanel === 'about'}
-		bind:offsetHeight={postsHeight}
 		aria-hidden={activePanel !== 'posts'}
 		inert={activePanel !== 'posts'}
 	>
@@ -77,8 +52,6 @@
 		id="projects"
 		class="showcase-panel"
 		class:active={activePanel === 'projects'}
-		class:inactive-right={activePanel !== 'projects'}
-		bind:offsetHeight={projectsHeight}
 		aria-hidden={activePanel !== 'projects'}
 		inert={activePanel !== 'projects'}
 	>
@@ -90,50 +63,30 @@
 	.showcase-viewport {
 		position: relative;
 		min-width: 0;
-		min-height: 38rem;
-		overflow: hidden;
-		overflow-anchor: none;
-		scroll-margin-top: 64px;
+		overflow-x: clip;
+		scroll-margin-top: 80px;
 	}
 
 	.showcase-panel {
-		position: absolute;
-		inset: 0 0 auto;
-		width: 100%;
-		opacity: 0;
-		transition:
-			transform 620ms cubic-bezier(0.22, 1, 0.36, 1),
-			opacity 360ms ease;
-		will-change: transform, opacity;
+		display: none;
 	}
-
-	.showcase-viewport.mounted {
-		min-height: 0;
-	}
-
 	.showcase-panel.active {
-		z-index: 1;
-		opacity: 1;
-		transform: translateX(0);
+		display: block;
+		animation: reveal 300ms cubic-bezier(0.22, 1, 0.36, 1);
 	}
-
-	.showcase-panel.inactive-left {
-		pointer-events: none;
-		transform: translateX(-105%);
+	@keyframes reveal {
+		from {
+			opacity: 0;
+			transform: translateX(var(--slide-from));
+		}
+		to {
+			opacity: 1;
+			transform: translateX(0);
+		}
 	}
-
-	.showcase-panel.inactive-right {
-		pointer-events: none;
-		transform: translateX(105%);
-	}
-
-	.showcase-viewport:not(.mounted) .showcase-panel {
-		transition: none;
-	}
-
 	@media (prefers-reduced-motion: reduce) {
-		.showcase-panel {
-			transition-duration: 0.01ms;
+		.showcase-panel.active {
+			animation: none;
 		}
 	}
 </style>

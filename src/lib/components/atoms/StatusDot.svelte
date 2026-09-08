@@ -4,7 +4,7 @@
 	let { status }: { status: StatusInfo } = $props();
 
 	let borderClass = $derived(
-		status.text === 'Offline'
+		['Offline', 'Loading status…', 'Status unavailable'].includes(status.text)
 			? 'border-neutral-400'
 			: status.text === 'Online'
 				? 'border-[#68b78d]'
@@ -19,7 +19,11 @@
 	aria-hidden="true"
 >
 	<span
-		class="h-1.5 w-1.5 rounded-full {status.dotColorClass} {status.text !== 'Offline'
+		class="h-1.5 w-1.5 rounded-full {status.dotColorClass} {[
+			'Online',
+			'Idle',
+			'Do Not Disturb'
+		].includes(status.text)
 			? 'animate-pulse'
 			: ''}"
 	></span>

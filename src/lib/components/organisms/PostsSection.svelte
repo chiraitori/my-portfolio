@@ -13,8 +13,9 @@
 	let filteredPosts = $derived(
 		posts.filter((post) => {
 			const query = searchTerm.trim().toLowerCase();
-			const matchesSearch =
-				post.title.toLowerCase().includes(query) || post.description.toLowerCase().includes(query);
+			const matchesSearch = [post.title, post.description, ...post.tags].some((value) =>
+				value.toLowerCase().includes(query)
+			);
 			const matchesTag = selectedTag === 'All' || post.tags.includes(selectedTag);
 
 			return matchesSearch && matchesTag;
@@ -24,10 +25,10 @@
 
 <section class="relative flex flex-col gap-6 pt-12">
 	<!-- Divider line extending slightly on the sides -->
-	<div class="absolute top-0 left-[-1.5px] right-[-1.5px] h-[1px] bg-[#302b30]/20 dark:bg-zinc-700/30"></div>
+	<div class="absolute top-0 left-[-1.5px] right-[-1.5px] h-[1px] bg-[#302b30]/20"></div>
 	<div class="flex items-center gap-3">
 		<svg
-			class="h-6 w-6 fill-none stroke-current stroke-[1.8] text-[#302b30] dark:text-zinc-200"
+			class="h-6 w-6 fill-none stroke-current stroke-[1.8] text-[var(--ink)]"
 			viewBox="0 0 24 24"
 			aria-hidden="true"
 		>
@@ -37,16 +38,18 @@
 				d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.83 20.08a4.5 4.5 0 0 1-2.052 1.238l-3.084.741.741-3.084a4.5 4.5 0 0 1 1.238-2.052L16.862 4.487Zm0 0L19.5 7.125"
 			/>
 		</svg>
-		<h2 class="font-sans text-2xl font-bold text-[#302b30] dark:text-zinc-100">Recent posts</h2>
+		<h2 class="font-sans text-2xl font-bold text-[var(--ink)]">Recent posts</h2>
 	</div>
 
-	<div class="grid grid-cols-1 items-start gap-8 md:grid-cols-4">
+	<div class="grid min-w-0 grid-cols-1 items-start gap-6 xl:grid-cols-[200px_minmax(0,1fr)]">
 		<PostFilters {tags} bind:searchTerm bind:selectedTag />
 
-		<div class="flex flex-col gap-5 md:col-span-3">
+		<div class="flex min-w-0 flex-col gap-5">
 			<div class="flex items-center justify-between">
 				<div class="flex items-center gap-2">
-					<span class="text-xs font-bold tracking-wider text-[#302b30]/40 dark:text-zinc-400/60 uppercase">Results</span>
+					<span class="text-xs font-bold tracking-wider text-[var(--ink-muted)] uppercase"
+						>Results</span
+					>
 					<span
 						class="results-badge flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold"
 					>
@@ -61,9 +64,17 @@
 					<PostCard {post} onclick={() => onSelectPost?.(post)} />
 				{:else}
 					<div
-						class="rounded-3xl border-[1.5px] border-[#302b30]/15 dark:border-zinc-700/30 bg-white/20 dark:bg-zinc-900/20 p-8 text-center text-[#302b30]/40 dark:text-zinc-400/50"
+						class="rounded-3xl border-[1.5px] border-[var(--line)] bg-[var(--surface)] p-8 text-center text-[var(--ink-muted)]"
 					>
-						No posts match your filters. Try adjusting your search term.
+						<p>No posts match your filters.</p>
+						<button
+							type="button"
+							class="mt-3 min-h-11 rounded-full border border-[var(--line)] px-4 text-[var(--accent)] hover:bg-[var(--accent-soft)]"
+							onclick={() => {
+								searchTerm = '';
+								selectedTag = 'All';
+							}}>Clear filters</button
+						>
 					</div>
 				{/each}
 			</div>
@@ -73,29 +84,11 @@
 
 <style>
 	.results-badge {
-		background-color: #fcefe9;
-		border-color: rgba(224, 123, 83, 0.2);
-		color: #e07b53;
+		background: var(--accent-soft);
+		border-color: var(--line);
+		color: var(--accent);
 	}
 	.results-badge-dot {
-		background-color: #e07b53;
-	}
-
-	:global(html.dark) .results-badge {
-		background-color: #2c1a14;
-		border-color: rgba(224, 123, 83, 0.3);
-		color: #f08c66;
-	}
-	:global(html.dark) .results-badge-dot {
-		background-color: #f08c66;
-	}
-
-	:global(html.ganyu-theme) .results-badge {
-		background-color: #edf7fc;
-		border-color: rgba(117, 157, 202, 0.2);
-		color: #759dca;
-	}
-	:global(html.ganyu-theme) .results-badge-dot {
-		background-color: #759dca;
+		background: var(--accent);
 	}
 </style>

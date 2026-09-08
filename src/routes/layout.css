@@ -16,11 +16,21 @@
 }
 
 @layer utilities {
-	.rounded-full { border-radius: 255px 225px 260px 240px / 225px 255px 240px 260px !important; }
-	.rounded-3xl { border-radius: 35px 20px 35px 20px / 20px 35px 20px 35px !important; }
-	.rounded-2xl { border-radius: 26px 15px 26px 15px / 15px 26px 15px 26px !important; }
-	.rounded-xl { border-radius: 21px 12px 21px 12px / 12px 21px 12px 21px !important; }
-	.rounded-lg { border-radius: 14px 8px 14px 8px / 8px 14px 8px 14px !important; }
+	.rounded-full {
+		border-radius: 255px 225px 260px 240px / 225px 255px 240px 260px !important;
+	}
+	.rounded-3xl {
+		border-radius: 35px 20px 35px 20px / 20px 35px 20px 35px !important;
+	}
+	.rounded-2xl {
+		border-radius: 26px 15px 26px 15px / 15px 26px 15px 26px !important;
+	}
+	.rounded-xl {
+		border-radius: 21px 12px 21px 12px / 12px 21px 12px 21px !important;
+	}
+	.rounded-lg {
+		border-radius: 14px 8px 14px 8px / 8px 14px 8px 14px !important;
+	}
 }
 
 :root {
@@ -28,28 +38,20 @@
 	--theme-origin-y: 32px;
 	font-family: var(--font-sans);
 	color-scheme: light;
-	background: #fcf7ef;
+	background: var(--page);
 	font-synthesis: none;
-	zoom: 1.1;
-}
-
-@media (max-width: 840px) {
-	:root {
-		zoom: 1;
-	}
 }
 
 html {
 	scroll-behavior: smooth;
 	scroll-padding-top: 64px;
-	scrollbar-width: none;
-	-ms-overflow-style: none;
+	scrollbar-gutter: stable;
 }
 
 body {
 	margin: 0;
 	min-width: 320px;
-	background: #fcf7ef;
+	background: var(--page);
 	transition:
 		background 350ms ease,
 		color 350ms ease;
@@ -66,37 +68,34 @@ html.theme-transitioning *::after {
 	box-sizing: border-box;
 }
 
-button,
-input,
-select,
-textarea {
-	font: inherit;
+@layer base {
+	button,
+	input,
+	select,
+	textarea {
+		font: inherit;
+	}
 }
 
-*::-webkit-scrollbar {
-	display: none;
+:focus-visible {
+	outline: 2px solid var(--accent);
+	outline-offset: 4px;
 }
 
-html.ganyu-theme {
-	background-color: #edf7fc;
+@media (max-width: 1023px) {
+	body {
+		padding-bottom: 0;
+	}
 }
 
-html.ganyu-theme body {
-	background:
-		radial-gradient(circle at 12% 12%, rgba(207, 232, 250, 0.82), transparent 30%),
-		radial-gradient(circle at 88% 25%, rgba(220, 210, 244, 0.62), transparent 28%),
-		linear-gradient(145deg, #f5fbff 0%, #edf7fc 48%, #f5f0ff 100%);
-	color: #263854;
-}
-
-html.ganyu-theme .hero-title {
-	color: #385886;
-}
-
-html.ganyu-theme .theme-surface {
-	border-color: rgba(81, 119, 157, 0.24);
-	background: rgba(247, 252, 255, 0.68);
-	box-shadow: 4px 4px 0 rgba(75, 103, 144, 0.06);
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+	}
 }
 
 .theme-transition-overlay {
@@ -108,14 +107,10 @@ html.ganyu-theme .theme-surface {
 }
 
 .theme-transition-overlay.to-ganyu {
-	background:
-		radial-gradient(circle at 12% 12%, rgba(207, 232, 250, 0.98), transparent 30%),
-		radial-gradient(circle at 88% 25%, rgba(220, 210, 244, 0.88), transparent 28%),
-		linear-gradient(145deg, #f5fbff 0%, #edf7fc 48%, #f5f0ff 100%);
+	background: #f0f5fa;
 }
-
 .theme-transition-overlay.to-default {
-	background: #fcf7ef;
+	background: #faf6f3;
 }
 
 ::view-transition-old(root),
@@ -180,34 +175,71 @@ html.transitioning-to-light::view-transition-new(root) {
 	}
 }
 
-/* Dark Mode Overrides */
+/* Warm paper / rose ink. Ganyu uses the same roles with a cool palette. */
+:root {
+	--page: #faf6f3;
+	--surface: #fffcfa;
+	--surface-hover: #f5ecec;
+	--ink: #382d37;
+	--ink-muted: #73616b;
+	--line: #e4d7dc;
+	--accent: #944c68;
+	--accent-hover: #7e3e57;
+	--accent-soft: #f2e2e8;
+	--on-accent: #ffffff;
+	--shadow: #382d3709;
+	--nav-bg: #faf6f3f2;
+}
 html.dark {
 	color-scheme: dark;
-	background: #19151d;
+	--page: #1b171c;
+	--surface: #262027;
+	--surface-hover: #302630;
+	--ink: #f0e5eb;
+	--ink-muted: #bdaab5;
+	--line: #443540;
+	--accent: #e5a4bd;
+	--accent-hover: #efbdd0;
+	--accent-soft: #3d2935;
+	--on-accent: #30212b;
+	--shadow: #00000024;
+	--nav-bg: #1b171cf2;
 }
-html.dark body {
-	background:
-		radial-gradient(circle at 14% 10%, rgba(80, 46, 62, 0.28), transparent 32%),
-		radial-gradient(circle at 88% 22%, rgba(62, 49, 83, 0.22), transparent 30%),
-		linear-gradient(145deg, #1b1720 0%, #151219 52%, #1d1721 100%);
-	color: #e9dde3;
+html.ganyu-theme {
+	--page: #f0f5fa;
+	--surface: #fafdff;
+	--surface-hover: #e8eff8;
+	--ink: #283b55;
+	--ink-muted: #566b82;
+	--line: #d0deeb;
+	--accent: #466c9b;
+	--accent-hover: #365780;
+	--accent-soft: #dfeaf7;
+	--on-accent: #ffffff;
+	--shadow: #283b5509;
+	--nav-bg: #f0f5faf2;
 }
-/* Ganyu Dark Mode Overrides */
 html.dark.ganyu-theme {
-	background-color: #0b1222;
+	--page: #131c2a;
+	--surface: #1c293b;
+	--surface-hover: #243449;
+	--ink: #e4edf8;
+	--ink-muted: #a9bbd1;
+	--line: #34485f;
+	--accent: #a2c3ed;
+	--accent-hover: #bdd6f6;
+	--accent-soft: #293e59;
+	--on-accent: #192a40;
+	--shadow: #00000024;
+	--nav-bg: #131c2af2;
 }
-html.dark.ganyu-theme body {
-	background:
-		radial-gradient(circle at 12% 12%, rgba(39, 74, 113, 0.46), transparent 35%),
-		radial-gradient(circle at 88% 25%, rgba(50, 46, 92, 0.38), transparent 30%),
-		linear-gradient(145deg, #101a2f 0%, #0b1222 52%, #14142a 100%);
-	color: #d8e4f2;
+html,
+body {
+	background: var(--page);
+	color: var(--ink);
 }
-html.dark.ganyu-theme .theme-surface {
-	border-color: rgba(129, 169, 215, 0.26);
-	background: rgba(14, 22, 42, 0.62);
-	box-shadow: 4px 4px 0 rgba(129, 169, 215, 0.12);
-}
-html.dark.ganyu-theme .hero-title {
-	color: #8fb8ea;
+.theme-surface {
+	background: var(--surface);
+	border-color: var(--line);
+	box-shadow: 0 4px 20px var(--shadow);
 }

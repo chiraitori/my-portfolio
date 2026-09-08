@@ -1,3 +1,7 @@
+<script lang="ts">
+	import { navigateSection } from '$lib/navigation';
+</script>
+
 <div class="hero-intro z-10 flex flex-col gap-6">
 	<div class="flex flex-col gap-2">
 		<h1 class="hero-title select-none">
@@ -5,47 +9,40 @@
 			I'm Chiraitori~
 		</h1>
 		<p
-			class="hero-subtitle font-handwritten mt-4 text-2xl text-[#302b30] dark:text-zinc-200 select-none md:text-3xl"
+			class="hero-subtitle font-handwritten mt-4 text-xl text-[var(--ink)] select-none md:text-2xl"
 		>
 			<span class="line-through decoration-2">IoT Developer</span> <br />
-			<span class="hero-highlight">Hardware Muncher :)</span>
+			<span class="hero-highlight">I make things. Sometimes they work.</span>
+		</p>
+		<p class="max-w-sm text-xs leading-relaxed text-[var(--ink-muted)]">
+			Part-time cosplayer, still waiting for my debut.
 		</p>
 	</div>
 
-	<div class="hero-actions mt-2 flex items-center gap-4">
+	<div class="hero-actions mt-2 flex flex-wrap items-center gap-4">
 		<a
 			href="#about"
-			class="hand-drawn-btn btn-yellow px-7 py-3 font-semibold text-[#302b30]"
-			onclick={() => {
-				setTimeout(() => {
-					document
-						.querySelector('.showcase-viewport')
-						?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-				}, 50);
-			}}
+			class="hand-drawn-btn btn-primary px-7 py-3 font-semibold text-[var(--ink)]"
+			onclick={(event) => navigateSection(event, '#about')}
 		>
 			About me
 		</a>
 		<a
 			href="#posts"
-			class="hand-drawn-btn btn-white px-7 py-3 font-semibold text-[#302b30] dark:text-zinc-200"
-			onclick={() => {
-				setTimeout(() => {
-					document
-						.querySelector('.showcase-viewport')
-						?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-				}, 50);
-			}}
+			class="hand-drawn-btn btn-white px-7 py-3 font-semibold text-[var(--ink)]"
+			onclick={(event) => navigateSection(event, '#posts')}
 		>
 			Browse posts
 		</a>
 	</div>
 
-	<div class="hero-connect mt-4 flex flex-col gap-3 text-current/80 sm:flex-row sm:items-center sm:gap-4">
-		<span class="text-sm font-medium">Let's connect</span>
+	<div
+		class="hero-connect mt-4 flex flex-col gap-3 text-current/80 sm:flex-row sm:items-center sm:gap-4"
+	>
+		<span class="connect-label text-sm font-medium">Let's connect</span>
 		<div class="flex flex-wrap items-center gap-3">
 			<a
-				href="https://github.com"
+				href="https://github.com/chiraitori"
 				aria-label="GitHub"
 				class="social-link rounded-full p-2 text-current transition-colors hover:bg-current/8"
 			>
@@ -65,47 +62,7 @@
 				</svg>
 			</a>
 			<a
-				href="https://twitter.com"
-				aria-label="Twitter"
-				class="social-link rounded-full p-2 text-current transition-colors hover:bg-current/8"
-			>
-				<svg
-					class="social-icon h-5 w-5"
-					viewBox="0 0 24 24"
-					aria-hidden="true"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="1.8"
-					stroke-linecap="round"
-					stroke-linejoin="round"
-				>
-					<path
-						d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"
-					/>
-				</svg>
-			</a>
-			<a
-				href="https://bluesky.social"
-				aria-label="BlueSky"
-				class="social-link rounded-full p-2 text-current transition-colors hover:bg-current/8"
-			>
-				<svg
-					class="social-icon h-5 w-5"
-					viewBox="0 0 24 24"
-					aria-hidden="true"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="1.8"
-					stroke-linecap="round"
-					stroke-linejoin="round"
-				>
-					<path
-						d="M12 10.8c-1.5-2.5-4-5.8-7-7.8C3.5 1.9 2.3.8.7.2 0 0 0 .5 0 1c0 2.4.6 6 2 8 1.4 2 2.8 2.7 4.5 3-1.7.3-3 .8-4.5 3-1.4 2-2 5.6-2 8 0 .5 0 1 .7.8 1.6-.6 2.8-1.7 4.3-2.8 3-2 5.5-5.3 7-7.8m0 0c1.5-2.5 4-5.8 7-7.8 1.5-1.1 2.7-2.2 4.3-2.8.7-.2.7.3.7.8 0 2.4-.6 6-2 8-1.4 2-2.8 2.7-4.5 3 1.7.3 3 .8 4.5 3 1.4 2 2 5.6 2 8 0 .5 0 1-.7.8-1.6-.6-2.8-1.7-4.3-2.8-3-2-5.5-5.3-7-7.8"
-					/>
-				</svg>
-			</a>
-			<a
-				href="https://discord.com"
+				href="https://discord.com/users/685716988471148552"
 				aria-label="Discord"
 				class="social-link rounded-full p-2 text-current transition-colors hover:bg-current/8"
 			>
@@ -135,7 +92,7 @@
 				</svg>
 			</a>
 			<a
-				href="mailto:contact@chiraitori.io.vn"
+				href="mailto:mail@chiraitori.io.vn"
 				aria-label="Email"
 				class="social-link rounded-full p-2 text-current transition-colors hover:bg-current/8"
 			>
@@ -159,37 +116,46 @@
 </div>
 
 <style>
+	.hero-connect {
+		flex-wrap: wrap;
+	}
+	.connect-label {
+		flex-shrink: 0;
+	}
+	@media (max-width: 1023px) {
+		.hero-connect {
+			flex-direction: row;
+			align-items: center;
+			gap: 8px;
+		}
+		.connect-label {
+			display: none;
+		}
+	}
+
+	.hand-drawn-btn.btn-primary {
+		color: var(--on-accent);
+	}
+	.social-link {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 44px;
+		min-height: 44px;
+	}
 	.hero-title {
 		margin: 0;
 		max-width: 100%;
-		color: #202747;
+		color: var(--ink);
 		font-family: var(--font-hero);
-		font-size: 62px;
+		font-size: clamp(2.25rem, 5.5cqw, 3.375rem);
 		font-weight: 400;
 		line-height: 1.05;
 		letter-spacing: 0;
 	}
 
-	:global(html.dark) .hero-title {
-		color: #f4f4f5;
-		text-shadow: 0 2px 10px rgba(0, 0, 0, 0.45), 0 4px 24px rgba(0, 0, 0, 0.25);
-	}
-
-	:global(html.dark.ganyu-theme) .hero-title {
-		color: #e2f0fd;
-		text-shadow: 0 2px 12px rgba(9, 13, 22, 0.8), 0 4px 28px rgba(9, 13, 22, 0.5);
-	}
-
 	.font-handwritten {
 		font-family: var(--font-handwritten);
-	}
-
-	:global(html.dark) .font-handwritten {
-		text-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
-	}
-
-	:global(html.dark.ganyu-theme) .font-handwritten {
-		text-shadow: 0 1px 8px rgba(9, 13, 22, 0.7);
 	}
 
 	.social-icon {
@@ -219,20 +185,20 @@
 		inset: -1px;
 		z-index: -1;
 		border-style: solid;
-		border-color: #302b30;
-		box-shadow: 3px 4px 0px 0px #302b30;
+		border-color: var(--line);
+		box-shadow: 3px 4px 0px 0px var(--line);
 		transition: all 150ms ease;
 	}
 
-	.hand-drawn-btn.btn-yellow::before {
-		background-color: #fbeea5;
+	.hand-drawn-btn.btn-primary::before {
+		background-color: var(--accent);
 		border-radius: 80px 60px 90px 70px / 70px 90px 60px 80px;
 		border-width: 3px 2px 2px 3px;
 		transform: rotate(-0.5deg);
 	}
 
 	.hand-drawn-btn.btn-white::before {
-		background-color: #ffffff;
+		background-color: var(--surface);
 		border-radius: 60px 90px 70px 80px / 80px 70px 90px 60px;
 		border-width: 2px 3px 3px 2px;
 		transform: rotate(0.5deg);
@@ -243,15 +209,15 @@
 	}
 
 	.hand-drawn-btn:hover::before {
-		box-shadow: 2px 3px 0px 0px #302b30;
+		box-shadow: 2px 3px 0px 0px var(--line);
 	}
 
-	.hand-drawn-btn.btn-yellow:hover::before {
-		background-color: #fae383;
+	.hand-drawn-btn.btn-primary:hover::before {
+		background-color: var(--accent-hover);
 	}
 
 	.hand-drawn-btn.btn-white:hover::before {
-		background-color: #f5f5f5;
+		background-color: var(--surface-hover);
 	}
 
 	.hand-drawn-btn:active {
@@ -259,40 +225,11 @@
 	}
 
 	.hand-drawn-btn:active::before {
-		box-shadow: 0px 0px 0px 0px #302b30;
+		box-shadow: 0px 0px 0px 0px var(--line);
 	}
 
 	.hero-highlight {
-		color: #a15f70;
-	}
-
-	:global(html.ganyu-theme) .hero-highlight {
-		color: #4b6790;
-	}
-
-	:global(html.dark) .hero-highlight {
-		color: #e8a7b5;
-	}
-
-	:global(html.dark) .hand-drawn-btn::before {
-		border-color: #e4e4e7;
-		box-shadow: 3px 4px 0px 0px #e4e4e7;
-	}
-
-	:global(html.dark) .hand-drawn-btn:hover::before {
-		box-shadow: 2px 3px 0px 0px #e4e4e7;
-	}
-
-	:global(html.dark) .hand-drawn-btn:active::before {
-		box-shadow: 0px 0px 0px 0px #e4e4e7;
-	}
-
-	:global(html.dark) .hand-drawn-btn.btn-white::before {
-		background-color: #27272a;
-	}
-
-	:global(html.dark) .hand-drawn-btn.btn-white:hover::before {
-		background-color: #3f3f46;
+		color: var(--accent);
 	}
 
 	@media (max-width: 767px) {
@@ -300,7 +237,6 @@
 			gap: 1.25rem;
 			max-width: min(100%, 21rem);
 		}
-
 		.hero-title {
 			font-size: clamp(2.2rem, 10vw, 2.65rem);
 			line-height: 1.08;
@@ -308,7 +244,7 @@
 
 		.hero-subtitle {
 			margin-top: 0.75rem;
-			font-size: clamp(1.35rem, 6vw, 1.5rem);
+			font-size: clamp(1.1rem, 4.8vw, 1.25rem);
 			line-height: 1.25;
 		}
 

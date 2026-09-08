@@ -1,4 +1,3 @@
-import { redirect } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
 interface DiscordRpcApplication {
@@ -44,7 +43,7 @@ function getFallbackSvg(label: string) {
 
 export const GET: RequestHandler = async ({ fetch, params, url }) => {
 	const { applicationId } = params;
-	const label = url.searchParams.get('label') ?? 'Activity';
+	const label = (url.searchParams.get('label') ?? 'Activity').slice(0, 100);
 
 	if (!DISCORD_APPLICATION_ID_PATTERN.test(applicationId)) {
 		return new Response(getFallbackSvg(label), {
@@ -59,7 +58,9 @@ export const GET: RequestHandler = async ({ fetch, params, url }) => {
 	let steamAppId: string | undefined;
 
 	try {
-		const response = await fetch(`https://discord.com/api/v10/applications/${applicationId}/rpc`);
+		const response = await fetch(`https://discord.com/api/v10/applications/${applicationId}/rpc`, {
+			signal: AbortSignal.timeout(4000)
+		});
 
 		if (response.ok) {
 			const application = (await response.json()) as DiscordRpcApplication;
@@ -72,24 +73,41 @@ export const GET: RequestHandler = async ({ fetch, params, url }) => {
 		// Fall back to an inline SVG so the activity row never shows a broken image.
 	}
 
-	if (steamAppId) {
-		throw redirect(
-			302,
+	const candidates: string[] = [];
+	if (iconHash && /^[a-zA-Z0-9_]+$/.test(iconHash)) {
+		candidates.push(
+			`https://cdn.discordapp.com/app-icons/${applicationId}/${iconHash}.png?size=128`
+		);
+	}
+	if (steamAppId && /^\d+$/.test(steamAppId)) {
+		candidates.push(
 			`https://cdn.cloudflare.steamstatic.com/steam/apps/${steamAppId}/library_600x900.jpg`
 		);
 	}
 
-	if (iconHash) {
-		throw redirect(
-			302,
-			`https://cdn.discordapp.com/app-icons/${applicationId}/${iconHash}.png?size=128`
-		);
+	for (const candidate of candidates) {
+		try {
+			const image = await fetch(candidate, { signal: AbortSignal.timeout(4000) });
+			const contentType = image.headers.get('content-type') ?? '';
+			if (image.ok && /^image\/(png|jpeg|webp|gif)(;|$)/i.test(contentType)) {
+				return new Response(await image.arrayBuffer(), {
+					headers: {
+						'content-type': contentType,
+						'cache-control': 'public, max-age=86400',
+						'x-content-type-options': 'nosniff'
+					}
+				});
+			}
+			await image.body?.cancel();
+		} catch {
+			// Try the next source when an image is missing or its CDN is unavailable.
+		}
 	}
 
 	return new Response(getFallbackSvg(label), {
 		headers: {
 			'content-type': 'image/svg+xml',
-			'cache-control': 'public, max-age=86400'
+			'cache-control': 'public, max-age=300'
 		}
 	});
 };

@@ -7,10 +7,11 @@
 	import DiscordStatusCard from '$lib/components/molecules/DiscordStatusCard.svelte';
 	import ViewersCard from '$lib/components/molecules/ViewersCard.svelte';
 	import { getCustomActivityIcon } from '$lib/data/activity-icons';
+	import { getCrunchyrollInfo } from '$lib/data/crunchyroll';
+	import { uniqueActivities } from '$lib/data/presence';
 	import type {
 		LanyardActivity,
 		LanyardData,
-		LanyardResponse,
 		Post,
 		PresenceActivityInfo,
 		SpotifyInfo,
@@ -21,20 +22,37 @@
 	let selectedPost = $state<Post | null>(null);
 
 	let lanyardData = $state<LanyardData | null>(null);
+	let presenceUnavailable = $state(false);
 
 	onMount(() => {
 		let socket: WebSocket;
+		let disposed = false;
 		let heartbeatInterval: number;
 		let reconnectTimer: number;
+		let connectionTimeout: number;
 
 		const connect = () => {
+			if (disposed) return;
 			socket = new WebSocket('wss://api.lanyard.rest/socket');
+			connectionTimeout = window.setTimeout(() => socket.close(), 15_000);
 
 			socket.onmessage = (event) => {
-				const message = JSON.parse(event.data);
+				if (disposed) return;
+				let message;
+				try {
+					message = JSON.parse(event.data);
+				} catch {
+					return;
+				}
+				if (!message || typeof message !== 'object') return;
 
-				if (message.op === 1) {
+				if (
+					message.op === 1 &&
+					Number.isFinite(message.d?.heartbeat_interval) &&
+					message.d.heartbeat_interval > 0
+				) {
 					// Received Hello, start heartbeat
+					window.clearInterval(heartbeatInterval);
 					heartbeatInterval = window.setInterval(() => {
 						if (socket.readyState === WebSocket.OPEN) {
 							socket.send(JSON.stringify({ op: 3 }));
@@ -53,6 +71,13 @@
 				} else if (message.op === 0) {
 					// Received Event
 					if (message.t === 'INIT_STATE' || message.t === 'PRESENCE_UPDATE') {
+						if (
+							!Array.isArray(message.d?.activities) ||
+							!['online', 'idle', 'dnd', 'offline'].includes(message.d?.discord_status)
+						)
+							return;
+						window.clearTimeout(connectionTimeout);
+						presenceUnavailable = false;
 						lanyardData = message.d;
 					}
 				}
@@ -60,16 +85,22 @@
 
 			socket.onclose = () => {
 				window.clearInterval(heartbeatInterval);
+				window.clearTimeout(connectionTimeout);
+				if (disposed) return;
+				lanyardData = null;
+				presenceUnavailable = true;
 				// Try to reconnect in 5 seconds
-				reconnectTimer = window.setTimeout(connect, 5000);
+				if (!disposed) reconnectTimer = window.setTimeout(connect, 5000);
 			};
 		};
 
 		connect();
 
 		return () => {
+			disposed = true;
 			window.clearInterval(heartbeatInterval);
 			window.clearTimeout(reconnectTimer);
+			window.clearTimeout(connectionTimeout);
 			if (socket) socket.close();
 		};
 	});
@@ -77,9 +108,9 @@
 	let statusInfo = $derived.by<StatusInfo>(() => {
 		if (!lanyardData) {
 			return {
-				text: 'Offline',
+				text: presenceUnavailable ? 'Status unavailable' : 'Loading status…',
 				dotColorClass: 'bg-neutral-400',
-				message: "I'm not online right now.",
+				message: presenceUnavailable ? 'Reconnecting to Discord…' : 'Checking Discord activity…',
 				location: 'Vietnam',
 				love: 'n/a'
 			};
@@ -173,20 +204,39 @@
 
 		const isCode =
 			name.toLowerCase().includes('visual studio code') || name.toLowerCase() === 'code';
-		const title = activity.details ?? name;
-		const subtitle = activity.state ?? activity.assets?.large_text ?? activity.assets?.small_text;
+		const isCrunchyroll = /\bcrunchyroll\b/i.test(name);
+		const title = activity.details?.trim() || name;
+		const subtitle =
+			activity.state?.trim() || activity.assets?.large_text || activity.assets?.small_text;
 		const customIcon = getCustomActivityIcon(activity);
+		const crunchyroll = isCrunchyroll ? getCrunchyrollInfo(activity) : undefined;
 
 		return {
 			id: `${activity.application_id ?? name}-${activity.timestamps?.start ?? activity.state ?? title}`,
-			kind: isCode ? 'code' : activity.type === 0 ? 'game' : 'activity',
-			label: isCode ? 'Coding in VS Code' : activity.type === 0 ? `Playing ${name}` : name,
+			kind: isCrunchyroll
+				? 'crunchyroll'
+				: isCode
+					? 'code'
+					: activity.type === 0
+						? 'game'
+						: 'activity',
+			label: isCrunchyroll
+				? 'Watching on Crunchyroll'
+				: isCode
+					? 'Coding in VS Code'
+					: activity.type === 3
+						? `Watching ${name}`
+						: activity.type === 0
+							? `Playing ${name}`
+							: name,
 			title,
-			subtitle,
+			subtitle: isCrunchyroll ? crunchyroll?.subtitle : subtitle,
+			episode: crunchyroll?.episode,
 			imageUrl:
 				customIcon?.imageUrl ??
 				getActivityImageUrl(activity) ??
 				getApplicationIconUrl(activity, name),
+			fallbackImageUrl: getApplicationIconUrl(activity, name),
 			imageAlt:
 				customIcon?.imageAlt ?? activity.assets?.large_text ?? activity.assets?.small_text ?? name
 		};
@@ -209,15 +259,15 @@
 			});
 		}
 
-		const richActivities = lanyardData?.activities
+		const richActivities = uniqueActivities(lanyardData?.activities ?? [])
 			.map(getPresenceActivity)
 			.filter((activity): activity is PresenceActivityInfo => Boolean(activity));
 
-		if (richActivities?.[0]) {
-			activities.push(richActivities[0]);
+		if (richActivities) {
+			activities.push(...richActivities);
 		}
 
-		return activities.slice(0, 1);
+		return activities.slice(0, 2);
 	});
 </script>
 
@@ -231,8 +281,8 @@
 
 <SiteNav />
 
-<main id="home" class="flex min-h-screen flex-col px-5 pb-32 md:px-[30px] md:pb-12">
-	<div class="grid grid-cols-1 items-start gap-8 lg:grid-cols-[minmax(0,1fr)_280px] lg:gap-12">
+<main id="home" class="mx-auto flex w-full max-w-[1320px] flex-col px-4 pb-12 sm:px-6 lg:px-8">
+	<div class="grid grid-cols-1 items-start gap-8 lg:grid-cols-[minmax(0,1fr)_280px] lg:gap-8">
 		<!-- Hero Section -->
 		<div class="order-1 lg:col-start-1 lg:row-start-1 flex flex-col min-w-0">
 			<HeroSection />
@@ -240,15 +290,15 @@
 
 		<!-- Sidebar Column (Sticky on desktop, middle on mobile) -->
 		<div
-			class="order-2 lg:col-start-2 lg:row-start-1 lg:row-span-2 lg:sticky lg:top-24 mt-8 lg:mt-0 flex flex-col gap-5"
+			class="order-2 lg:col-start-2 lg:row-start-1 lg:row-span-2 lg:sticky lg:top-24 lg:pt-8 min-w-0 flex flex-col gap-5"
 		>
 			<DiscordStatusCard status={statusInfo} activities={presenceActivities} />
-			<ViewersCard />
+			<div class="hidden lg:block"><ViewersCard /></div>
 		</div>
 
 		<!-- Work Showcase Tab Panel -->
 		<div class="order-3 lg:col-start-1 lg:row-start-2 flex flex-col min-w-0">
-			<WorkShowcase onSelectPost={(post) => (selectedPost = post)} />
+			<WorkShowcase status={statusInfo} onSelectPost={(post) => (selectedPost = post)} />
 		</div>
 	</div>
 </main>

@@ -6,10 +6,10 @@
 
 <button
 	type="button"
-	class="theme-surface post-card-focus group flex w-full cursor-pointer items-center justify-between gap-4 rounded-3xl border-[1.5px] border-[#302b30]/15 dark:border-zinc-700/30 bg-white/40 dark:bg-zinc-900/30 p-5 text-left shadow-[4px_4px_0px_0px_rgba(48,43,48,0.01)] dark:shadow-[4px_4px_0px_0px_rgba(0,0,0,0.15)] backdrop-blur-md transition-all hover:-translate-y-0.5 hover:bg-white/60 dark:hover:bg-zinc-800/40 hover:shadow-[5px_5px_0px_0px_rgba(48,43,48,0.05)] dark:hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,0.2)] focus-visible:outline-2 focus-visible:outline-offset-2"
+	class="theme-surface post-card-focus group flex min-w-0 w-full cursor-pointer flex-wrap items-center sm:flex-nowrap justify-between gap-4 rounded-3xl border-[1.5px] border-[var(--line)] bg-[var(--surface)] p-5 text-left shadow-[4px_4px_0px_0px_rgba(48,43,48,0.01)] dark:shadow-[4px_4px_0px_0px_rgba(0,0,0,0.15)] backdrop-blur-md transition-all hover:-translate-y-0.5 hover:bg-[var(--surface)] dark:hover:bg-[var(--surface)] hover:shadow-[5px_5px_0px_0px_rgba(48,43,48,0.05)] dark:hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,0.2)] focus-visible:outline-2 focus-visible:outline-offset-2"
 	{onclick}
 >
-	<div class="flex items-center gap-4">
+	<div class="flex min-w-0 items-center gap-3">
 		<div
 			class="post-icon-wrapper flex h-10 w-10 shrink-0 items-center justify-center rounded-full border transition-transform group-hover:scale-105"
 		>
@@ -26,69 +26,38 @@
 			</svg>
 		</div>
 
-		<div class="flex flex-col gap-1">
+		<div class="flex min-w-0 flex-col gap-1 break-words">
 			<h3
-				class="post-title-text font-sans relative inline-block text-lg font-semibold text-[#302b30] dark:text-zinc-100 transition-colors"
+				class="post-title-text font-sans relative inline-block text-lg font-semibold text-[var(--ink)] transition-colors"
 			>
-				<span
-					class="post-title-underline border-b-2 border-transparent pb-0.5 transition-all"
-				>
+				<span class="post-title-underline border-b-2 border-transparent pb-0.5 transition-all">
 					{post.title}
 				</span>
 			</h3>
-			<p class="text-sm text-[#302b30]/70 dark:text-zinc-300/80">{post.description}</p>
+			<p class="text-sm text-[var(--ink-muted)]">{post.description}</p>
 		</div>
 	</div>
 
-	<div class="shrink-0 rounded-full bg-[#302b30]/5 dark:bg-zinc-700/30 px-3 py-1 text-xs font-medium text-[#302b30]/40 dark:text-zinc-400">
+	<div
+		class="shrink-0 rounded-full bg-[#302b30]/5 px-3 py-1 text-xs font-medium text-[var(--ink-muted)]"
+	>
 		{post.readTime}
 	</div>
 </button>
 
 <style>
 	.post-card-focus:focus-visible {
-		outline-color: #a15f70;
+		outline-color: var(--accent);
 	}
 	.post-icon-wrapper {
-		border-color: rgba(189, 154, 201, 0.2);
-		background-color: #f0e8f8;
-		color: #bd9ac9;
+		border-color: var(--line);
+		background: var(--accent-soft);
+		color: var(--accent);
 	}
 	.group:hover .post-title-text {
-		color: #a15f70;
+		color: var(--accent);
 	}
 	.group:hover .post-title-underline {
-		border-color: #d89aaa;
-	}
-
-	:global(html.dark) .post-card-focus:focus-visible {
-		outline-color: #e8a7b5;
-	}
-	:global(html.dark) .post-icon-wrapper {
-		border-color: rgba(189, 154, 201, 0.3);
-		background-color: #3b224c;
-		color: #d8b4fe;
-	}
-	:global(html.dark) .group:hover .post-title-text {
-		color: #e8a7b5;
-	}
-	:global(html.dark) .group:hover .post-title-underline {
-		border-color: #e8a7b5;
-	}
-
-	:global(html.ganyu-theme) .post-card-focus:focus-visible {
-		outline-color: #759dca;
-	}
-	:global(html.ganyu-theme) .post-icon-wrapper {
-		border-color: rgba(117, 157, 202, 0.2);
-		background-color: #edf7fc;
-		color: #759dca;
-	}
-	:global(html.ganyu-theme) .group:hover .post-title-text {
-		color: #4b6790;
-	}
-	:global(html.ganyu-theme) .group:hover .post-title-underline {
-		border-color: #759dca;
+		border-color: var(--accent);
 	}
 </style>
-

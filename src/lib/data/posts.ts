@@ -1,9 +1,18 @@
 import type { Post } from '$lib/types/portfolio';
 import hello from '../post/Hello.md?raw';
-import loving from '../post/Loving.md?raw';
 import cosplaying from '../post/Cosplaying.md?raw';
+import buildingThings from '../post/BuildingThings.md?raw';
 
 export const posts: Post[] = [
+	{
+		title: 'What I build, and what I learn along the way',
+		description:
+			'Android apps, Go APIs, Discord bots, manga translation tools, and embedded projects as I prepare for an internship.',
+		readTime: '2 min read',
+		tags: ['Development', 'Projects', 'Personal'],
+		date: '2026-09-08',
+		content: buildingThings
+	},
 	{
 		title: 'Hello!',
 		description: 'Welcome to my new website! Check out my previous portfolio version.',
@@ -13,21 +22,12 @@ export const posts: Post[] = [
 		content: hello
 	},
 	{
-		title: 'I have a girlfriend after 2 years! 💖',
-		description: 'A personal story about how I met my lover, our dating journey, and how happy I am now.',
+		title: 'My cosplay plans for HoyoFest: Evelyn Chevalier',
+		description:
+			"Buying or renting Clorinde's costume has been difficult, so I'm planning to cosplay Evelyn Chevalier from Zenless Zone Zero at HoyoFest.",
 		readTime: '2 min read',
-		tags: ['Personal', 'Story'],
-		date: '2026-06-10',
-		content: loving
-	},
-	{
-		title: 'Why I decided to start cosplaying my favorite characters 👗',
-		description: 'Sharing my journey, thoughts, and costuming updates on entering the world of cosplay.',
-		readTime: '3 min read',
 		tags: ['Personal', 'Cosplay', 'Anime'],
 		date: '2026-06-09',
 		content: cosplaying
 	}
 ];
-
-

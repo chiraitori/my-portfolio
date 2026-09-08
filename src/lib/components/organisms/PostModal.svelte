@@ -1,49 +1,60 @@
 <script lang="ts">
-	import { fade, scale } from 'svelte/transition';
+	import { scale } from 'svelte/transition';
 	import type { Post } from '$lib/types/portfolio';
 	import { marked } from 'marked';
 	import { onMount } from 'svelte';
 
 	let { post, close }: { post: Post; close: () => void } = $props();
 
-	let parsedContent = $state('');
+	let dialog: HTMLDialogElement;
+	let parsedContent = $derived(
+		marked
+			.parse(post.content ?? '', { async: false })
+			.replace(/<img /g, '<img referrerpolicy="no-referrer" ')
+	);
 
-	onMount(async () => {
-		if (post.content) {
-			const html = await marked.parse(post.content);
-			parsedContent = html.replace(/<img /g, '<img referrerpolicy="no-referrer" ');
-		}
+	onMount(() => {
+		const previousOverflow = document.documentElement.style.overflow;
+		const previousFocus =
+			document.activeElement instanceof HTMLElement ? document.activeElement : null;
+		dialog.showModal();
+		dialog.querySelector<HTMLButtonElement>('button[aria-label="Close modal"]')?.focus();
+		document.documentElement.style.overflow = 'hidden';
+		return () => {
+			dialog.close();
+			document.documentElement.style.overflow = previousOverflow;
+			previousFocus?.focus({ preventScroll: true });
+		};
 	});
-
-	function handleKeydown(event: KeyboardEvent) {
-		if (event.key === 'Escape') close();
-	}
 </script>
 
-<svelte:window onkeydown={handleKeydown} />
-
-<!-- svelte-ignore a11y_click_events_have_key_events -->
-<!-- svelte-ignore a11y_no_static_element_interactions -->
-<div
-	class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
-	transition:fade={{ duration: 200 }}
+<dialog
+	bind:this={dialog}
+	aria-labelledby="post-title"
+	oncancel={(event) => {
+		event.preventDefault();
+		close();
+	}}
+	class="post-dialog fixed inset-0 m-0 h-dvh max-h-none w-full max-w-none bg-transparent p-4 sm:p-6"
 >
-	<div
-		class="absolute inset-0 bg-[#302b30]/40 dark:bg-black/60 backdrop-blur-sm"
+	<button
+		type="button"
+		class="absolute inset-0 cursor-default"
+		tabindex="-1"
 		onclick={close}
-		aria-label="Close modal"
-	></div>
+		aria-label="Close modal backdrop"
+	></button>
 
 	<div
-		class="theme-surface post-modal-card relative z-10 flex max-h-full w-full max-w-3xl flex-col overflow-hidden rounded-3xl border-2 border-[#302b30] dark:border-zinc-200 shadow-[6px_6px_0px_0px_#302b30] dark:shadow-[6px_6px_0px_0px_#e4e4e7]"
+		class="theme-surface post-modal-card relative z-10 flex max-h-full w-full max-w-3xl flex-col overflow-hidden rounded-3xl border-2 border-[#302b30] shadow-[6px_6px_0px_0px_#302b30] dark:shadow-[6px_6px_0px_0px_#e4e4e7]"
 		in:scale={{ start: 0.95, duration: 250, opacity: 0 }}
 		out:scale={{ start: 0.95, duration: 200, opacity: 0 }}
 	>
 		<div
-			class="flex items-center justify-between border-b-2 border-[#302b30]/15 dark:border-zinc-700/30 bg-white/40 p-4 sm:px-6"
+			class="flex items-center justify-between border-b-2 border-[var(--line)] bg-[var(--surface)] p-4 sm:px-6"
 		>
-			<div class="flex items-center gap-3">
-				<div class="rounded-full bg-[#bd9ac9]/20 p-2 text-[#bd9ac9]">
+			<div class="flex min-w-0 items-center gap-3">
+				<div class="rounded-full bg-[#bd9ac9]/20 p-2 text-[var(--accent)]">
 					<svg
 						class="h-5 w-5 fill-none stroke-current stroke-[1.8]"
 						viewBox="0 0 24 24"
@@ -57,8 +68,10 @@
 					</svg>
 				</div>
 				<div>
-					<h2 class="font-sans text-xl font-bold text-[#302b30] dark:text-zinc-100 sm:text-2xl">{post.title}</h2>
-					<div class="flex items-center gap-2 text-sm text-[#302b30]/60 dark:text-zinc-400">
+					<h2 id="post-title" class="font-sans text-xl font-bold text-[var(--ink)] sm:text-2xl">
+						{post.title}
+					</h2>
+					<div class="flex items-center gap-2 text-sm text-[var(--ink-muted)]">
 						<span>{post.date}</span>
 						<span>&bull;</span>
 						<span>{post.readTime}</span>
@@ -67,7 +80,7 @@
 			</div>
 			<button
 				type="button"
-				class="rounded-full p-2 text-[#302b30]/60 dark:text-zinc-400 transition-colors hover:bg-[#302b30]/10 dark:hover:bg-zinc-700/30 hover:text-[#302b30] dark:hover:text-zinc-100"
+				class="min-h-11 min-w-11 shrink-0 rounded-full p-2 text-[var(--ink-muted)] transition-colors hover:bg-[#302b30]/10 dark:hover:bg-[var(--surface)] hover:text-[var(--ink)] dark:hover:text-[var(--ink)]"
 				onclick={close}
 				aria-label="Close modal"
 			>
@@ -77,41 +90,40 @@
 			</button>
 		</div>
 
-		<div class="overflow-y-auto p-4 sm:p-8">
+		<div class="min-h-0 overflow-y-auto overscroll-contain break-words p-4 sm:p-8">
 			{#if !post.content}
-				<div class="py-12 text-center text-[#302b30]/60 dark:text-zinc-400">
-					This post has no content yet.
-				</div>
+				<div class="py-12 text-center text-[var(--ink-muted)]">This post has no content yet.</div>
 			{:else}
-				<article class="prose prose-stone prose-headings:font-sans prose-a:text-[#a15f70] dark:prose-invert dark:prose-a:text-[#e8a7b5] max-w-none">
+				<article
+					class="prose prose-stone prose-headings:font-sans prose-a:text-[var(--accent)] dark:prose-invert dark:prose-a:text-[var(--accent)] max-w-none"
+				>
 					{@html parsedContent}
 				</article>
 			{/if}
 		</div>
 	</div>
-</div>
+</dialog>
 
 <style>
+	.post-dialog[open] {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+	.post-dialog::backdrop {
+		background: rgb(24 20 28 / 65%);
+		backdrop-filter: blur(6px);
+	}
 	.post-modal-card {
-		background-color: #fcf7ef;
+		max-height: 100%;
 	}
-
-	:global(html.dark) .post-modal-card {
-		background-color: #1a1a1a;
+	article :global(pre) {
+		max-width: 100%;
+		overflow-x: auto;
 	}
-
-	:global(html.ganyu-theme) .post-modal-card {
-		background-color: #edf7fc;
-		border-color: #4b6790;
-		box-shadow: 6px 6px 0px 0px rgba(75, 103, 144, 0.3);
+	.post-modal-card {
+		background-color: var(--surface);
 	}
-
-	:global(html.dark.ganyu-theme) .post-modal-card {
-		background-color: #0f172a;
-		border-color: rgba(75, 103, 144, 0.3);
-		box-shadow: 6px 6px 0px 0px rgba(75, 103, 144, 0.15);
-	}
-
 	article :global(img) {
 		max-height: 380px;
 		width: auto;
@@ -119,6 +131,5 @@
 		display: block;
 		margin: 1.5rem auto;
 		border-radius: 16px;
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 	}
 </style>

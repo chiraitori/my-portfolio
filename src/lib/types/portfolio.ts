@@ -44,7 +44,7 @@ export interface LanyardResponse {
 }
 
 export interface StatusInfo {
-	text: 'Online' | 'Idle' | 'Do Not Disturb' | 'Offline';
+	text: 'Online' | 'Idle' | 'Do Not Disturb' | 'Offline' | 'Loading status…' | 'Status unavailable';
 	dotColorClass: string;
 	message: string;
 	location: string;
@@ -65,11 +65,13 @@ export interface SpotifyInfo {
 
 export interface PresenceActivityInfo {
 	id: string;
-	kind: 'spotify' | 'code' | 'game' | 'activity';
+	kind: 'spotify' | 'crunchyroll' | 'code' | 'game' | 'activity';
 	label: string;
 	title: string;
 	subtitle?: string;
+	episode?: string;
 	imageUrl?: string;
+	fallbackImageUrl?: string;
 	imageAlt: string;
 	href?: string;
 	timestamps?: {

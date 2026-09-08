@@ -1,31 +1,35 @@
-# Why I decided to start cosplaying my favorite characters 👗
+_Updated September 8, 2026 — my cosplay plans for HoyoFest._
 
-## My First Cosplay Idea
-About a year ago, after going to a cosplay festival, I decided to try cosplaying for the first time. I was super excited because I'd finally get to dress up as my favorite character! But then I got a reality check when I saw how expensive cosplay costumes and props actually are. 💸
+Going to a cosplay festival was what made me want to try it myself. Picking a character sounded like the easy part. Finding a costume that fits and is actually available has taken a few attempts. For HoyoFest, I'm now planning to cosplay Evelyn Chevalier from Zenless Zone Zero.
 
+## Robin, then Phoebe
 
-## The "Robin" Phase
-I started watching tons of YouTube tutorials on cosplay, saved up some money, and ended up buying a Robin (from Honkai: Star Rail) costume. But man, it was so complicated and came with way too many accessories! I was just like... *what do I do with all of this?* :))
+I was still pretty shy about wearing those first costumes out. I even considered booking a studio shoot so I could try cosplay and take some photos without going straight into a crowded event. That was only an idea, though; I haven't made my cosplay debut yet.
 
-Then I realized another issue: the outfit is quite revealing, which is pretty tough for a guy to pull off properly without some serious modifications! :v
+I started with Robin from _Honkai: Star Rail_. I watched tutorials, saved up, and bought her costume. Then I had to figure out what to do with all those accessories. The fit and coverage also needed some work before I'd feel comfortable wearing it.
 
-This is Robin from Honkai: Star Rail:
-![Robin](https://static.wikia.nocookie.net/houkai-star-rail/images/9/92/Character_Robin_Splash_Art.png)
+![Robin from Honkai: Star Rail — character outfit reference](https://static.wikia.nocookie.net/houkai-star-rail/images/9/92/Character_Robin_Splash_Art.png)
 
-## Up Next: Phoebe
-After that, I thought of cosplaying Phoebe from *Wuthering Waves*. However, when the costume arrived and I tried it on, it didn't fit me well at all. So, I had to return it. :))
+After that, I tried Phoebe from _Wuthering Waves_. Her costume didn't fit me well when it arrived, so I returned it. Another character I wanted to cosplay, another outfit that didn't work out.
 
-Phoebe from Wuthering Waves:
-![Phoebe](https://static.wikia.nocookie.net/wutheringwaves/images/c/c5/Phoebe_Full_Sprite.png)
+![Phoebe from Wuthering Waves — character outfit reference](https://static.wikia.nocookie.net/wutheringwaves/images/c/c5/Phoebe_Full_Sprite.png)
 
-## Third Time's a Charm? Clorinde!
-Recently, I ordered a Clorinde costume from *Genshin Impact*. It cost me a pretty penny, but it's currently on its way! I will make sure to update this post once it arrives. :v
+## I might skip Clorinde
 
-Clorinde from Genshin Impact:
-![Clorinde](https://static.wikia.nocookie.net/gensin-impact/images/8/87/Character_Clorinde_Full_Wish.png)
+I'd also planned to cosplay Clorinde from _Genshin Impact_, but getting her costume has been difficult. Buying it and renting it have both been hard to arrange, so I might drop that plan altogether.
 
-## Learning Makeup
-I'm also realizing that I'm probably going to have to learn how to do makeup. That's going to be a whole new challenge! lol
+The earlier version of this post said the outfit was on its way. That's no longer the plan, and I'm focusing on Evelyn for HoyoFest instead.
 
-## Final Thoughts
-I don't think I'll ever stop loving anime characters, and I'm really excited to keep trying to cosplay my favorites. Wish me luck! :)))
+![Clorinde from Genshin Impact — character outfit reference](https://static.wikia.nocookie.net/gensin-impact/images/8/87/Character_Clorinde_Full_Wish.png)
+
+## Evelyn Chevalier for HoyoFest
+
+I'm planning to cosplay **Evelyn Chevalier from Zenless Zone Zero** at **HoyoFest**.
+
+With Evelyn, I want to try being a little braver and actually go out in cosplay. It's something I'm working toward, not something I've already done. My debut is still ahead of me.
+
+![Evelyn Chevalier from Zenless Zone Zero — character outfit reference](https://fastcdn.hoyoverse.com/content-v2/nap/127403/e90f841040d1b7f1d703dffebe2edf64_3255851908411847312.png)
+
+_Evelyn artwork from the [official Zenless Zone Zero character page](https://zenless.hoyoverse.com/en-us/character?id=127403)._
+
+I still need to get the outfit sorted and learn how to do the makeup. There's a fair bit left to prepare, but I have a character and an event in mind now. I'll update this post when I have progress to share.

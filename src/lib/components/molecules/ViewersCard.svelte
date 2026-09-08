@@ -17,7 +17,7 @@
 	const VISITOR_STORAGE_KEY = 'portfolio:visitor-id';
 
 	let stats = $state<ViewerStats | null>(null);
-	
+
 	const animatedOnline = new Tween(0, { duration: 1500, easing: cubicOut });
 	const animatedOnPage = new Tween(0, { duration: 1500, easing: cubicOut });
 	const animatedAllTime = new Tween(0, { duration: 1500, easing: cubicOut });
@@ -33,7 +33,7 @@
 	});
 
 	const formatCount = (value: number | undefined) => {
-		if (value === undefined || value === 0 && !stats) return '—';
+		if (value === undefined || (value === 0 && !stats)) return '—';
 		const rounded = Math.round(value);
 		if (rounded < 1000) return rounded.toLocaleString('en-US');
 
@@ -46,13 +46,23 @@
 	onMount(() => {
 		const path = window.location.pathname;
 		const pageViewKey = `portfolio:viewed:${path}`;
-		let visitorId = window.localStorage.getItem(VISITOR_STORAGE_KEY);
-		let shouldRecordView = window.sessionStorage.getItem(pageViewKey) !== '1';
+		let visitorId: string | null = null;
+		let shouldRecordView = true;
+		try {
+			visitorId = window.localStorage.getItem(VISITOR_STORAGE_KEY);
+			shouldRecordView = window.sessionStorage.getItem(pageViewKey) !== '1';
+		} catch {
+			/* Continue without persistent storage. */
+		}
 		let heartbeatTimer: number | undefined;
 
 		if (!visitorId) {
 			visitorId = crypto.randomUUID();
-			window.localStorage.setItem(VISITOR_STORAGE_KEY, visitorId);
+			try {
+				window.localStorage.setItem(VISITOR_STORAGE_KEY, visitorId);
+			} catch {
+				/* Storage is optional. */
+			}
 		}
 
 		const updateStats = async () => {
@@ -74,7 +84,11 @@
 				stats = await response.json();
 
 				if (shouldRecordView) {
-					window.sessionStorage.setItem(pageViewKey, '1');
+					try {
+						window.sessionStorage.setItem(pageViewKey, '1');
+					} catch {
+						/* Storage is optional. */
+					}
 					shouldRecordView = false;
 				}
 			} catch {
@@ -98,61 +112,67 @@
 </script>
 
 <div
-	class="theme-surface flex flex-col gap-5 rounded-3xl border-[1.5px] border-[#302b30]/15 dark:border-zinc-700/30 bg-white/40 dark:bg-zinc-900/30 p-6 shadow-[4px_4px_0px_0px_rgba(48,43,48,0.03)] dark:shadow-[4px_4px_0px_0px_rgba(0,0,0,0.15)] backdrop-blur-md"
+	class="theme-surface flex flex-col gap-5 rounded-3xl border-[1.5px] border-[var(--line)] bg-[var(--surface)] p-6 shadow-[4px_4px_0px_0px_rgba(48,43,48,0.03)] dark:shadow-[4px_4px_0px_0px_rgba(0,0,0,0.15)] backdrop-blur-md"
 >
 	<div class="flex items-center gap-2">
 		<span
-			class="flex h-3.5 w-3.5 items-center justify-center rounded-full border-2 border-[#a15f70] dark:border-[#e8a7b5]"
+			class="flex h-3.5 w-3.5 items-center justify-center rounded-full border-2 border-[var(--accent)]"
 			aria-hidden="true"
 		>
-			<span class="h-1.5 w-1.5 rounded-full bg-[#a15f70] dark:bg-[#e8a7b5]"></span>
+			<span class="h-1.5 w-1.5 rounded-full bg-[var(--accent)]"></span>
 		</span>
-		<span class="font-sans text-sm font-semibold text-[#302b30] dark:text-zinc-100">Viewers</span>
+		<span class="font-sans text-sm font-semibold text-[var(--ink)]">Viewers</span>
 	</div>
 
-	<div class="grid grid-cols-2 gap-4 border-b border-[#302b30]/5 dark:border-zinc-700/20 pb-4">
+	<div class="grid grid-cols-2 gap-4 border-b border-[var(--line)] pb-4">
 		<div>
-			<div class="text-[10px] font-medium tracking-wider text-[#302b30]/50 dark:text-zinc-400/60 uppercase">
+			<div class="text-[10px] font-medium tracking-wider text-[var(--ink-muted)] uppercase">
 				Right now
 			</div>
-			<div class="mt-0.5 text-3xl font-bold text-[#302b30] dark:text-zinc-100">{formatCount(animatedOnline.current)}</div>
-			<div class="text-[10px] text-[#302b30]/40 dark:text-zinc-400/50">on site</div>
+			<div class="mt-0.5 text-3xl font-bold text-[var(--ink)]">
+				{formatCount(animatedOnline.current)}
+			</div>
+			<div class="text-[10px] text-[var(--ink-muted)]">on site</div>
 		</div>
 		<div>
-			<div class="text-[10px] font-medium tracking-wider text-[#302b30]/50 dark:text-zinc-400/60 uppercase">
+			<div class="text-[10px] font-medium tracking-wider text-[var(--ink-muted)] uppercase">
 				This page
 			</div>
-			<div class="mt-0.5 text-3xl font-bold text-[#302b30] dark:text-zinc-100">{formatCount(animatedOnPage.current)}</div>
-			<div class="text-[10px] text-[#302b30]/40 dark:text-zinc-400/50">currently</div>
+			<div class="mt-0.5 text-3xl font-bold text-[var(--ink)]">
+				{formatCount(animatedOnPage.current)}
+			</div>
+			<div class="text-[10px] text-[var(--ink-muted)]">currently</div>
 		</div>
 	</div>
 
 	<div class="flex flex-col gap-4">
 		<div class="flex items-center justify-between">
 			<div>
-				<div class="text-[10px] font-medium tracking-wider text-[#302b30]/50 dark:text-zinc-400/60 uppercase">
-					<span class="mr-1 font-bold text-[#8ac9a6]">✦</span>All time
+				<div class="text-[10px] font-medium tracking-wider text-[var(--ink-muted)] uppercase">
+					<span class="mr-1 font-bold text-[var(--accent)]">✦</span>All time
 				</div>
-				<div class="mt-0.5 text-xl font-bold text-[#302b30] dark:text-zinc-100">
+				<div class="mt-0.5 text-xl font-bold text-[var(--ink)]">
 					{formatCount(animatedAllTime.current)}
 				</div>
-				<div class="text-[10px] text-[#302b30]/40 dark:text-zinc-400/50">total</div>
+				<div class="text-[10px] text-[var(--ink-muted)]">total</div>
 			</div>
 			<Sparkline
 				values={stats?.siteHistory ?? Array(14).fill(0)}
-				color="#68b78d"
+				color="var(--accent)"
 				gradientId="chart-green"
 			/>
 		</div>
 
 		<div class="flex items-center justify-between">
 			<div>
-				<div class="text-xl font-bold text-[#302b30] dark:text-zinc-100">{formatCount(animatedPageViews.current)}</div>
-				<div class="text-[10px] text-[#302b30]/40 dark:text-zinc-400/50">this page</div>
+				<div class="text-xl font-bold text-[var(--ink)]">
+					{formatCount(animatedPageViews.current)}
+				</div>
+				<div class="text-[10px] text-[var(--ink-muted)]">this page</div>
 			</div>
 			<Sparkline
 				values={stats?.pageHistory ?? Array(14).fill(0)}
-				color="#a27eb0"
+				color="var(--ink-muted)"
 				gradientId="chart-purple"
 			/>
 		</div>

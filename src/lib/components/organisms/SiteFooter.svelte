@@ -1,18 +1,17 @@
 <script lang="ts">
+	import { navigateSection } from '$lib/navigation';
 	const year = new Date().getFullYear();
-
-	function scrollToTop() {
-		document.getElementById('home')?.scrollIntoView({
-			behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
-			block: 'start'
-		});
-	}
 </script>
 
 <footer class="site-footer">
 	<div class="footer-main">
 		<div class="footer-intro">
-			<a class="footer-brand" href="#home" aria-label="chiraitori.dev home">chiraitori.dev</a>
+			<a
+				class="footer-brand"
+				href="#home"
+				onclick={(event) => navigateSection(event, '#home')}
+				aria-label="chiraitori.dev home">chiraitori.dev</a
+			>
 			<p>Thanks for stopping by. See you around the internet.</p>
 		</div>
 
@@ -25,7 +24,7 @@
 				</svg>
 			</a>
 
-			<button type="button" onclick={scrollToTop}>
+			<button type="button" onclick={(event) => navigateSection(event, '#home')}>
 				<span>Back to top</span>
 				<svg viewBox="0 0 24 24" aria-hidden="true">
 					<path d="m7 11 5-5 5 5" />
@@ -44,7 +43,9 @@
 <style>
 	.site-footer {
 		position: relative;
-		margin: 0 30px;
+		width: calc(100% - 64px);
+		max-width: 1256px;
+		margin: 0 auto;
 		padding: 32px 0 24px;
 		border-top: 1px solid color-mix(in srgb, currentColor 18%, transparent);
 		color: inherit;
@@ -56,7 +57,7 @@
 		left: 0;
 		width: min(150px, 36vw);
 		height: 3px;
-		background: #d89aaa;
+		background: var(--accent);
 		content: '';
 		transform: rotate(-0.5deg);
 	}
@@ -86,7 +87,7 @@
 
 	.footer-intro p {
 		margin: 0;
-		color: color-mix(in srgb, currentColor 68%, transparent);
+		color: var(--ink-muted);
 		font-family: var(--font-sans);
 		font-size: 14px;
 	}
@@ -120,15 +121,15 @@
 
 	.footer-actions a:hover,
 	.footer-actions button:hover {
-		border-color: #d89aaa;
-		background: color-mix(in srgb, #d89aaa 13%, transparent);
+		border-color: var(--accent);
+		background: color-mix(in srgb, var(--accent) 13%, transparent);
 		transform: translateY(-2px);
 	}
 
 	.footer-actions a:focus-visible,
 	.footer-actions button:focus-visible,
 	.footer-brand:focus-visible {
-		outline: 2px solid #c9788a;
+		outline: 2px solid var(--accent);
 		outline-offset: 3px;
 	}
 
@@ -147,18 +148,35 @@
 		margin-top: 26px;
 		padding-top: 16px;
 		border-top: 1px dashed color-mix(in srgb, currentColor 15%, transparent);
-		color: color-mix(in srgb, currentColor 55%, transparent);
+		color: var(--ink-muted);
 		justify-content: space-between;
 		gap: 16px;
 		font-family: var(--font-sans);
 		font-size: 12px;
 	}
 
+	@media (max-width: 1023px) {
+		.site-footer {
+			padding: 20px 0 calc(96px + env(safe-area-inset-bottom, 0px));
+		}
+		.footer-main {
+			display: none;
+		}
+		.footer-meta {
+			margin-top: 0;
+			padding-top: 0;
+			border-top: 0;
+			flex-wrap: wrap;
+			gap: 8px 16px;
+		}
+	}
+
 	@media (max-width: 640px) {
 		.site-footer {
-			margin: 0 20px;
+			width: calc(100% - 40px);
+			margin: 0 auto;
 			padding-top: 28px;
-			padding-bottom: 96px;
+			padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
 		}
 
 		.footer-main {
@@ -182,29 +200,5 @@
 		.footer-actions button {
 			transition: none;
 		}
-	}
-
-	:global(html.ganyu-theme) .site-footer::before {
-		background: #759dca;
-	}
-
-	:global(html.ganyu-theme) .footer-actions a:hover,
-	:global(html.ganyu-theme) .footer-actions button:hover {
-		border-color: #759dca;
-		background: color-mix(in srgb, #759dca 13%, transparent);
-	}
-
-	:global(html.ganyu-theme) .footer-actions a:focus-visible,
-	:global(html.ganyu-theme) .footer-actions button:focus-visible,
-	:global(html.ganyu-theme) .footer-brand:focus-visible {
-		outline: 2px solid #6398db;
-	}
-
-	:global(html.dark) .site-footer::before {
-		background: #d89aaa; /* keep the pink color in normal dark mode */
-	}
-
-	:global(html.dark.ganyu-theme) .site-footer::before {
-		background: #6398db;
 	}
 </style>
