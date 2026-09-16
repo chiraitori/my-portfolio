@@ -100,21 +100,6 @@ html.theme-transitioning *::after {
 	}
 }
 
-.theme-transition-overlay {
-	position: fixed;
-	inset: 0;
-	z-index: 9999;
-	display: block;
-	pointer-events: none;
-}
-
-.theme-transition-overlay.to-ganyu {
-	background: #f0f5fa;
-}
-.theme-transition-overlay.to-default {
-	background: #faf6f3;
-}
-
 ::view-transition-old(root),
 ::view-transition-new(root) {
 	animation: none;
@@ -142,6 +127,28 @@ html.transitioning-to-default::view-transition-new(root),
 html.transitioning-to-light::view-transition-new(root) {
 	z-index: 1;
 	animation: none;
+}
+
+/* Fade snapshots on touch screens instead of clipping a large moving circle. */
+@media (max-width: 1023px), (pointer: coarse) {
+	html.theme-transitioning::view-transition-old(root) {
+		z-index: 1;
+		animation: none;
+	}
+
+	html.theme-transitioning::view-transition-new(root) {
+		z-index: 2;
+		animation: theme-fade 220ms ease-out both;
+	}
+}
+
+@keyframes theme-fade {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
 }
 
 @keyframes theme-reveal {
@@ -191,6 +198,7 @@ html.transitioning-to-light::view-transition-new(root) {
 	--on-accent: #ffffff;
 	--shadow: #382d3709;
 	--nav-bg: #faf6f3f2;
+	--nav-bleed: #ffdedb;
 }
 html.dark {
 	color-scheme: dark;
@@ -206,6 +214,7 @@ html.dark {
 	--on-accent: #30212b;
 	--shadow: #00000024;
 	--nav-bg: #1b171cf2;
+	--nav-bleed: #63354b;
 }
 html.ganyu-theme {
 	--page: #f0f5fa;
@@ -220,6 +229,7 @@ html.ganyu-theme {
 	--on-accent: #ffffff;
 	--shadow: #283b5509;
 	--nav-bg: #f0f5faf2;
+	--nav-bleed: #dce9f7;
 }
 html.dark.ganyu-theme {
 	--page: #131c2a;
@@ -234,6 +244,7 @@ html.dark.ganyu-theme {
 	--on-accent: #192a40;
 	--shadow: #00000024;
 	--nav-bg: #131c2af2;
+	--nav-bleed: #314b69;
 }
 html,
 body {

@@ -3,7 +3,7 @@
 	import sunIcon from '$lib/assets/sun.svg';
 	import moonIcon from '$lib/assets/moon.svg';
 	import RoughTextFilter from '$lib/components/atoms/RoughTextFilter.svelte';
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import { navigateSection } from '$lib/navigation';
 
 	const navItems = [
@@ -39,65 +39,43 @@
 		}
 	}
 
-	async function runFallbackTransition(enabled: boolean) {
-		const overlay = document.createElement('span');
-		overlay.className = `theme-transition-overlay ${enabled ? 'to-ganyu' : 'to-default'}`;
-		overlay.setAttribute('aria-hidden', 'true');
-		document.body.append(overlay);
-
-		await overlay.animate(
-			[
-				{ clipPath: 'circle(0 at var(--theme-origin-x) var(--theme-origin-y))' },
-				{ clipPath: 'circle(150vmax at var(--theme-origin-x) var(--theme-origin-y))' }
-			],
-			{ duration: 680, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'forwards' }
-		).finished;
-
-		applyTheme(enabled);
-
-		await overlay.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 180 }).finished;
-		overlay.remove();
-	}
-
-	async function toggleTheme(event: MouseEvent) {
+	async function transitionTheme(event: MouseEvent, transitionClass: string, update: () => void) {
 		if (isThemeTransitioning) return;
 
 		const button = event.currentTarget as HTMLButtonElement;
 		const bounds = button.getBoundingClientRect();
 		const root = document.documentElement;
 		const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-		const nextTheme = !isGanyuTheme;
 		const documentWithTransitions = document as Document & {
-			startViewTransition?: (update: () => void) => { finished: Promise<void> };
+			startViewTransition?: (update: () => Promise<void>) => { finished: Promise<void> };
 		};
 
 		// Use clientX/Y and account for CSS zoom on the document element
-		const currentZoom = parseFloat(getComputedStyle(root).zoom || '1');
-		const originX = (event.clientX || bounds.left + bounds.width / 2) / currentZoom;
-		const originY = (event.clientY || bounds.top + bounds.height / 2) / currentZoom;
+		const currentZoom = parseFloat(getComputedStyle(root).zoom) || 1;
+		const originX = (event.detail ? event.clientX : bounds.left + bounds.width / 2) / currentZoom;
+		const originY = (event.detail ? event.clientY : bounds.top + bounds.height / 2) / currentZoom;
 		root.style.setProperty('--theme-origin-x', `${originX}px`);
 		root.style.setProperty('--theme-origin-y', `${originY}px`);
 
-		if (prefersReducedMotion) {
-			applyTheme(nextTheme);
+		if (prefersReducedMotion || !documentWithTransitions.startViewTransition) {
+			// Let the palette's CSS transitions handle browsers without snapshots.
+			update();
 			return;
 		}
 
 		isThemeTransitioning = true;
 		root.classList.add('theme-transitioning');
-		const transitionClass = nextTheme ? 'transitioning-to-ganyu' : 'transitioning-to-default';
 		root.classList.add(transitionClass);
 
 		try {
-			if (documentWithTransitions.startViewTransition) {
-				const transition = documentWithTransitions.startViewTransition(() => {
-					applyTheme(nextTheme);
-				});
-
-				await transition.finished;
-			} else {
-				await runFallbackTransition(nextTheme);
-			}
+			const transition = documentWithTransitions.startViewTransition(async () => {
+				update();
+				await tick();
+			});
+			await transition.finished;
+		} catch {
+			// A skipped snapshot must still leave the requested theme usable.
+			update();
 		} finally {
 			isThemeTransitioning = false;
 			root.classList.remove('theme-transitioning');
@@ -105,69 +83,22 @@
 		}
 	}
 
-	async function toggleDarkMode(event: MouseEvent) {
-		if (isThemeTransitioning) return;
+	function toggleTheme(event: MouseEvent) {
+		const enabled = !isGanyuTheme;
+		return transitionTheme(
+			event,
+			enabled ? 'transitioning-to-ganyu' : 'transitioning-to-default',
+			() => applyTheme(enabled)
+		);
+	}
 
-		const button = event.currentTarget as HTMLButtonElement;
-		const bounds = button.getBoundingClientRect();
-		const root = document.documentElement;
-		const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-		const nextTheme = !isDarkMode;
-		const documentWithTransitions = document as Document & {
-			startViewTransition?: (update: () => void) => { finished: Promise<void> };
-		};
-
-		// Use clientX/Y and account for CSS zoom on the document element
-		const currentZoom = parseFloat(getComputedStyle(root).zoom || '1');
-		const originX = (event.clientX || bounds.left + bounds.width / 2) / currentZoom;
-		const originY = (event.clientY || bounds.top + bounds.height / 2) / currentZoom;
-		root.style.setProperty('--theme-origin-x', `${originX}px`);
-		root.style.setProperty('--theme-origin-y', `${originY}px`);
-
-		if (prefersReducedMotion) {
-			applyDarkMode(nextTheme);
-			return;
-		}
-
-		isThemeTransitioning = true;
-		root.classList.add('theme-transitioning');
-		const transitionClass = nextTheme ? 'transitioning-to-dark' : 'transitioning-to-light';
-		root.classList.add(transitionClass);
-
-		try {
-			if (documentWithTransitions.startViewTransition) {
-				const transition = documentWithTransitions.startViewTransition(() => {
-					applyDarkMode(nextTheme);
-				});
-
-				await transition.finished;
-			} else {
-				// Fallback
-				const overlay = document.createElement('span');
-				overlay.className = `theme-transition-overlay ${nextTheme ? 'to-dark' : 'to-light'}`;
-				overlay.setAttribute('aria-hidden', 'true');
-				// Give overlay simple colors for fallback
-				overlay.style.backgroundColor = nextTheme ? '#1a1a1a' : '#fcf7ef';
-				document.body.append(overlay);
-
-				await overlay.animate(
-					[
-						{ clipPath: 'circle(0 at var(--theme-origin-x) var(--theme-origin-y))' },
-						{ clipPath: 'circle(150vmax at var(--theme-origin-x) var(--theme-origin-y))' }
-					],
-					{ duration: 680, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'forwards' }
-				).finished;
-
-				applyDarkMode(nextTheme);
-
-				await overlay.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 180 }).finished;
-				overlay.remove();
-			}
-		} finally {
-			isThemeTransitioning = false;
-			root.classList.remove('theme-transitioning');
-			root.classList.remove(transitionClass);
-		}
+	function toggleDarkMode(event: MouseEvent) {
+		const enabled = !isDarkMode;
+		return transitionTheme(
+			event,
+			enabled ? 'transitioning-to-dark' : 'transitioning-to-light',
+			() => applyDarkMode(enabled)
+		);
 	}
 
 	function syncActiveHref() {
@@ -434,8 +365,10 @@
 		height: 34px;
 		object-fit: contain;
 	}
-	.theme-toggle:hover {
-		transform: rotate(-8deg);
+	@media (hover: hover) and (pointer: fine) {
+		.theme-toggle:hover {
+			transform: rotate(-8deg);
+		}
 	}
 	.theme-toggle:disabled {
 		cursor: wait;
@@ -447,29 +380,67 @@
 		gap: clamp(8px, 2vw, 28px);
 	}
 	nav a {
+		position: relative;
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		min-height: 44px;
-		padding: 0 12px;
+		min-height: 56px;
+		padding: 0 8px;
 		gap: 8px;
-		color: var(--ink-muted);
-		font-size: 15px;
+		color: var(--ink);
+		font-family: var(--font-nav);
+		font-size: 19px;
 		font-weight: 600;
 		text-decoration: none;
-		border-radius: 16px;
-		transition:
-			color 180ms ease,
-			background 180ms ease;
+		border-radius: 4px;
+		transition: color 180ms ease;
 	}
-	nav a:hover,
-	nav a.active {
-		color: var(--accent);
-		background: var(--accent-soft);
+	nav a::after {
+		content: '';
+		position: absolute;
+		left: 7px;
+		right: 7px;
+		bottom: 5px;
+		height: 2px;
+		background: color-mix(in srgb, var(--accent) 60%, var(--nav-bleed));
+		border-radius: 60% 35% 55% 30%;
+		opacity: 0;
+		transform: rotate(-2deg) scaleX(0.3);
+		transform-origin: left center;
+		transition:
+			transform 200ms ease,
+			opacity 150ms ease;
+	}
+	nav a.active::after {
+		opacity: 0.7;
+		transform: rotate(-2deg) scaleX(1);
+	}
+	nav a span {
+		position: relative;
+		isolation: isolate;
+	}
+	nav a span::before {
+		content: '';
+		position: absolute;
+		z-index: -1;
+		inset: -6px -9px;
+		background: radial-gradient(ellipse at center, var(--nav-bleed) 30%, transparent 73%);
+		filter: blur(5px);
+		opacity: 0;
+		pointer-events: none;
+		transition: opacity 180ms ease;
+	}
+	nav a.active span::before {
+		opacity: 0.75;
+	}
+	@media (hover: hover) and (pointer: fine) {
+		nav a:hover {
+			color: var(--accent);
+		}
 	}
 	nav svg {
-		width: 20px;
-		height: 20px;
+		width: 24px;
+		height: 24px;
 		flex-shrink: 0;
 		fill: none;
 		stroke: currentColor;
@@ -501,21 +472,29 @@
 			gap: 4px;
 			background: var(--nav-bg);
 			border: 1px solid var(--line);
-			border-radius: 24px;
-			box-shadow: 0 8px 28px var(--shadow);
+			border-radius: 14px 12px 15px 11px;
+			box-shadow: 0 4px 16px var(--shadow);
 			backdrop-filter: blur(16px);
 		}
 		.mobile-bottom-nav a {
 			flex: 1;
 			min-width: 0;
 			flex-direction: column;
-			min-height: 48px;
-			padding: 5px 4px;
+			min-height: 52px;
+			padding: 3px 4px 9px;
 			gap: 3px;
-			border-radius: 18px;
+		}
+		.mobile-bottom-nav a::after {
+			left: 12px;
+			right: 12px;
+			bottom: 3px;
+		}
+		.mobile-bottom-nav svg {
+			width: 20px;
+			height: 20px;
 		}
 		.mobile-label {
-			font-size: 11px;
+			font-size: 12px;
 		}
 	}
 	:global(html:not(.ganyu-theme)) .ganyu-icon-only {
