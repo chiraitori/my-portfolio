@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import avatarUrl from '$lib/assets/avatar.png';
+	import avatarUrl from '$lib/assets/avatar.webp';
 	import Tooltip from '$lib/components/atoms/Tooltip.svelte';
 	import type { StatusInfo } from '$lib/types/portfolio';
 	import StatusDot from '$lib/components/atoms/StatusDot.svelte';

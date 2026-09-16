@@ -46,8 +46,32 @@ html {
 	scroll-behavior: smooth;
 	scroll-padding-top: 64px;
 	scrollbar-gutter: stable;
+	scrollbar-width: thin;
+	scrollbar-color: var(--scrollbar-thumb) transparent;
 	-webkit-text-size-adjust: 100%;
 	text-size-adjust: 100%;
+}
+
+::-webkit-scrollbar {
+	width: 10px;
+	height: 10px;
+}
+
+::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+	min-height: 48px;
+	background: var(--scrollbar-thumb);
+	border: 3px solid transparent;
+	border-radius: 999px;
+	background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: var(--accent);
+	background-clip: padding-box;
 }
 
 body {
@@ -199,6 +223,7 @@ html.transitioning-to-light::view-transition-new(root) {
 	--shadow: #382d3709;
 	--nav-bg: #faf6f3f2;
 	--nav-bleed: #ffdedb;
+	--scrollbar-thumb: #d8b5c1;
 }
 html.dark {
 	color-scheme: dark;
@@ -215,6 +240,7 @@ html.dark {
 	--shadow: #00000024;
 	--nav-bg: #1b171cf2;
 	--nav-bleed: #63354b;
+	--scrollbar-thumb: #69495c;
 }
 html.ganyu-theme {
 	--page: #f0f5fa;
@@ -230,6 +256,7 @@ html.ganyu-theme {
 	--shadow: #283b5509;
 	--nav-bg: #f0f5faf2;
 	--nav-bleed: #dce9f7;
+	--scrollbar-thumb: #a8bdd4;
 }
 html.dark.ganyu-theme {
 	--page: #131c2a;
@@ -245,6 +272,7 @@ html.dark.ganyu-theme {
 	--shadow: #00000024;
 	--nav-bg: #131c2af2;
 	--nav-bleed: #314b69;
+	--scrollbar-thumb: #506d8d;
 }
 html,
 body {

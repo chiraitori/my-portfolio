@@ -1,7 +1,7 @@
 <script lang="ts">
 	import HeroIntro from '$lib/components/molecules/HeroIntro.svelte';
-	import heroBanner from '$lib/assets/hero-banner.png';
-	import ganyuBanner from '$lib/assets/ganyu-character.png';
+	import heroBanner from '$lib/assets/hero-banner.webp';
+	import ganyuBanner from '$lib/assets/ganyu-character.webp';
 	import { onMount } from 'svelte';
 	let hero: HTMLElement;
 	let paused = $state(false);
