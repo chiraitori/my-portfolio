@@ -17,7 +17,11 @@
 
 		const playEgg = () => {
 			if (!audio) {
-				audio = new Audio('/audio/esteregg.wav');
+				audio = new Audio();
+				audio.preload = 'auto';
+				audio.src = audio.canPlayType('audio/ogg; codecs="opus"')
+					? '/audio/esteregg.ogg'
+					: '/audio/esteregg.mp3';
 				audio.onplaying = () => (playing = true);
 				audio.onpause = audio.onended = audio.onerror = () => (playing = false);
 			}
