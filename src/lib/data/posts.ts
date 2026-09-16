@@ -1,7 +1,7 @@
 import type { Post } from '$lib/types/portfolio';
-import hello from '../post/Hello.md?raw';
-import cosplaying from '../post/Cosplaying.md?raw';
-import buildingThings from '../post/BuildingThings.md?raw';
+import hello from '../posts/Hello.md?raw';
+import cosplaying from '../posts/Cosplaying.md?raw';
+import buildingThings from '../posts/BuildingThings.md?raw';
 
 export const posts: Post[] = [
 	{

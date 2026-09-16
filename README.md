@@ -1,60 +1,28 @@
-# sv
+# chiraitori.dev
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+Chiraitori's portfolio, built with SvelteKit and deployed on Cloudflare Pages. It includes a writing section, pinned GitHub projects, Discord presence, and viewer counts.
 
-## Cloudflare viewer analytics
-
-The viewer card uses Cloudflare Pages Functions and a D1 database. It stays within the
-Cloudflare free tier for normal portfolio traffic.
-
-1. Log in to Wrangler with `npx wrangler login`.
-2. Create the database with `npm run db:create`.
-3. Copy the returned database ID into `wrangler.toml`.
-4. Apply the schema with `npm run db:migrate:remote`.
-5. In Cloudflare Pages, add a D1 binding named `DB` for the `portfolio-analytics` database.
-6. In Cloudflare Pages, go to **Settings → Functions** and enable **View Analytics**.
-7. Add this custom path to route viewer requests to the function:
-```
-/api/v1/analytics/view/*
-```
-
-Use `npm run db:migrate:local` to create the local development database.
-
-## Creating a project
-
-If you're seeing this, you've probably already done this step. Congrats!
+## Development
 
 ```sh
-# create a new project
-npx sv create my-app
-```
-
-To recreate this project with the same configuration:
-
-```sh
-# recreate this project
-npx sv@0.16.0 create --template minimal --types ts --add prettier tailwindcss="plugins:typography,forms" sveltekit-adapter="adapter:auto" mcp="ide:other+setup:remote" --no-install new-portfolio-v2
-```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```sh
+npm install
 npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
 ```
 
-## Building
+`npm run check` validates the Svelte and TypeScript code. `npm run build` creates the Cloudflare Pages output.
 
-To create a production version of your app:
+## Project layout
 
-```sh
-npm run build
-```
+- `src/routes/` — site pages, global stylesheet, and API routes.
+- `src/lib/components/` — reusable UI and page sections.
+- `src/lib/data/` — post metadata, presence helpers, and activity icons.
+- `src/lib/posts/` — Markdown bodies for the writing section.
+- `src/lib/assets/` — images and icons imported by components.
+- `static/` — files served by URL, including the easter egg audio.
+- `migrations/` — D1 schema for viewer analytics.
 
-You can preview the production build with `npm run preview`.
+## External data
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+Pinned projects are fetched from `gh.chiraitori.dev`. Discord presence uses the Lanyard WebSocket. Viewer counts use the `/api/viewers` route and the D1 database bound as `DB` in `wrangler.toml`.
+
+For local analytics, run `npm run db:migrate:local`. When setting up a new Cloudflare Pages environment, configure its D1 `DB` binding and run `npm run db:migrate:remote` for the production schema.
