@@ -25,18 +25,110 @@
 	let presenceUnavailable = $state(false);
 
 	onMount(() => {
-		let socket: WebSocket;
+		const lanyardUrl = 'wss://api.lanyard.rest/socket';
+		const discordUserId = '685716988471148552';
+		let socket: WebSocket | null = null;
 		let disposed = false;
-		let heartbeatInterval: number;
-		let reconnectTimer: number;
-		let connectionTimeout: number;
+		let heartbeatTimer: number | undefined;
+		let reconnectTimer: number | undefined;
+		let connectionTimeout: number | undefined;
+		let reconnectAttempts = 0;
+		let reconnectDelayOverride: number | undefined;
+		let lastPresenceSignature = '';
+
+		const clearHeartbeat = () => {
+			if (heartbeatTimer !== undefined) {
+				window.clearInterval(heartbeatTimer);
+				heartbeatTimer = undefined;
+			}
+		};
+
+		const sendHeartbeat = () => {
+			if (socket?.readyState === WebSocket.OPEN) {
+				socket.send(JSON.stringify({ op: 3 }));
+			}
+		};
+
+		const startHeartbeat = (interval: number) => {
+			clearHeartbeat();
+			const safeInterval = Math.max(1000, Math.round(interval));
+			heartbeatTimer = window.setInterval(sendHeartbeat, safeInterval);
+		};
+
+		const getPresenceData = (message: unknown): LanyardData | null => {
+			if (!message || typeof message !== 'object') return null;
+			const event = message as {
+				op?: unknown;
+				t?: unknown;
+				d?: unknown;
+			};
+			if (event.op !== 0 || (event.t !== 'INIT_STATE' && event.t !== 'PRESENCE_UPDATE')) {
+				return null;
+			}
+
+			let data = event.d;
+			// INIT_STATE is a map when subscribing with subscribe_to_ids. Keep support
+			// for the old single-user shape so a server response can be upgraded safely.
+			if (
+				event.t === 'INIT_STATE' &&
+				data &&
+				typeof data === 'object' &&
+				!Array.isArray(data) &&
+				discordUserId in data &&
+				typeof (data as Record<string, unknown>)[discordUserId] === 'object'
+			) {
+				data = (data as Record<string, unknown>)[discordUserId];
+			}
+
+			if (!data || typeof data !== 'object') return null;
+			const candidate = data as Partial<LanyardData>;
+			if (
+				!Array.isArray(candidate.activities) ||
+				!['online', 'idle', 'dnd', 'offline'].includes(candidate.discord_status ?? '')
+			) {
+				return null;
+			}
+
+			return candidate as LanyardData;
+		};
+
+		const getPresenceSignature = (data: LanyardData) =>
+			JSON.stringify({
+				status: data.discord_status,
+				activities: data.activities,
+				listening_to_spotify: data.listening_to_spotify,
+				spotify: data.spotify,
+				kv: data.kv
+			});
+
+		const scheduleReconnect = (delayOverride?: number) => {
+			if (disposed || reconnectTimer !== undefined) return;
+			const baseDelay =
+				delayOverride ?? Math.min(30_000, 750 * 2 ** Math.min(reconnectAttempts, 5));
+			const jitter = delayOverride === undefined ? Math.round(baseDelay * Math.random() * 0.25) : 0;
+			reconnectAttempts += 1;
+			reconnectTimer = window.setTimeout(() => {
+				reconnectTimer = undefined;
+				connect();
+			}, baseDelay + jitter);
+		};
 
 		const connect = () => {
 			if (disposed) return;
-			socket = new WebSocket('wss://api.lanyard.rest/socket');
-			connectionTimeout = window.setTimeout(() => socket.close(), 15_000);
+			if (
+				socket &&
+				(socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING)
+			) {
+				return;
+			}
 
-			socket.onmessage = (event) => {
+			const nextSocket = new WebSocket(lanyardUrl);
+			socket = nextSocket;
+			connectionTimeout = window.setTimeout(() => {
+				if (socket === nextSocket && nextSocket.readyState !== WebSocket.OPEN) nextSocket.close();
+			}, 15_000);
+
+			nextSocket.onmessage = (event) => {
 				if (disposed) return;
 				let message;
 				try {
@@ -51,46 +143,53 @@
 					Number.isFinite(message.d?.heartbeat_interval) &&
 					message.d.heartbeat_interval > 0
 				) {
-					// Received Hello, start heartbeat
-					window.clearInterval(heartbeatInterval);
-					heartbeatInterval = window.setInterval(() => {
-						if (socket.readyState === WebSocket.OPEN) {
-							socket.send(JSON.stringify({ op: 3 }));
-						}
-					}, message.d.heartbeat_interval);
-
-					// Send Initialize
-					socket.send(
+					startHeartbeat(message.d.heartbeat_interval);
+					nextSocket.send(
 						JSON.stringify({
 							op: 2,
 							d: {
-								subscribe_to_id: '685716988471148552'
+								subscribe_to_ids: [discordUserId]
 							}
 						})
 					);
-				} else if (message.op === 0) {
-					// Received Event
-					if (message.t === 'INIT_STATE' || message.t === 'PRESENCE_UPDATE') {
-						if (
-							!Array.isArray(message.d?.activities) ||
-							!['online', 'idle', 'dnd', 'offline'].includes(message.d?.discord_status)
-						)
-							return;
+					return;
+				}
+
+				const data = getPresenceData(message);
+				if (data) {
+					reconnectAttempts = 0;
+					if (connectionTimeout !== undefined) {
 						window.clearTimeout(connectionTimeout);
-						presenceUnavailable = false;
-						lanyardData = message.d;
+						connectionTimeout = undefined;
 					}
+					presenceUnavailable = false;
+					const signature = getPresenceSignature(data);
+					if (signature !== lastPresenceSignature) {
+						lastPresenceSignature = signature;
+						lanyardData = data;
+					}
+					return;
+				}
+
+				if (message.op === 7 || message.op === 9) {
+					reconnectDelayOverride = message.op === 7 ? 250 : 1000;
+					nextSocket.close();
 				}
 			};
 
-			socket.onclose = () => {
-				window.clearInterval(heartbeatInterval);
-				window.clearTimeout(connectionTimeout);
+			nextSocket.onerror = () => nextSocket.close();
+			nextSocket.onclose = () => {
+				clearHeartbeat();
+				if (connectionTimeout !== undefined) {
+					window.clearTimeout(connectionTimeout);
+					connectionTimeout = undefined;
+				}
 				if (disposed) return;
-				lanyardData = null;
-				presenceUnavailable = true;
-				// Try to reconnect in 5 seconds
-				if (!disposed) reconnectTimer = window.setTimeout(connect, 5000);
+				if (!lanyardData) presenceUnavailable = true;
+				if (socket === nextSocket) socket = null;
+				const delay = reconnectDelayOverride;
+				reconnectDelayOverride = undefined;
+				scheduleReconnect(delay);
 			};
 		};
 
@@ -98,10 +197,10 @@
 
 		return () => {
 			disposed = true;
-			window.clearInterval(heartbeatInterval);
-			window.clearTimeout(reconnectTimer);
-			window.clearTimeout(connectionTimeout);
-			if (socket) socket.close();
+			clearHeartbeat();
+			if (reconnectTimer !== undefined) window.clearTimeout(reconnectTimer);
+			if (connectionTimeout !== undefined) window.clearTimeout(connectionTimeout);
+			socket?.close();
 		};
 	});
 
