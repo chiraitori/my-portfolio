@@ -1,151 +1,90 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { page } from '$app/state';
 
-	let { status = 404 }: { status?: number } = $props();
-	onMount(() => {
-		try {
-			const isGanyu = localStorage.getItem('portfolio-theme') === 'ganyu';
-			const isDark = localStorage.getItem('portfolio-dark-mode') === 'true';
-			document.documentElement.classList.toggle('ganyu-theme', isGanyu);
-			document.documentElement.classList.toggle('dark', isDark);
-		} catch {
-			// The page still works when storage is unavailable.
-		}
-	});
+	let notFound = $derived(page.status === 404);
 </script>
 
 <svelte:head>
-	<title>{status} | chiraitori.dev</title>
+	<title>{page.status} | chiraitori.dev</title>
 	<meta name="robots" content="noindex" />
 </svelte:head>
 
 <main class="error-page">
-	<div class="error-orbit" aria-hidden="true"></div>
-	<section class="error-card theme-surface" aria-labelledby="error-title">
-		<div class="error-code" aria-hidden="true">{status}</div>
-		<h1 id="error-title">This page wandered off.</h1>
-		<p>The address is missing or no longer exists. Let’s get you back to something that does.</p>
-		<div class="error-actions">
-			<a class="primary-action" href="/#home">Back home <span aria-hidden="true">↗</span></a>
-			<button class="secondary-action" type="button" onclick={() => history.back()}
-				>Go back <span aria-hidden="true">←</span></button
-			>
-		</div>
+	<section aria-labelledby="error-title">
+		<p class="error-code">{page.status}</p>
+		<h1 id="error-title">{notFound ? 'Nothing here.' : 'Something broke.'}</h1>
+		<p class="error-message">
+			{notFound ? 'Wrong link, maybe?' : 'Try again in a bit.'}
+		</p>
+		<a href="/#home">
+			<svg aria-hidden="true" viewBox="0 0 32 24" fill="none">
+				<path d="M28 13C21 11 13 14 5 12M12 5L4 12l8 7" />
+			</svg>
+			<span>Back home</span>
+		</a>
 	</section>
 </main>
 
 <style>
 	.error-page {
-		position: relative;
 		display: grid;
-		min-height: 100dvh;
-		place-items: center;
-		overflow: hidden;
-		padding: 24px;
-		background:
-			radial-gradient(
-				circle at 72% 22%,
-				color-mix(in srgb, var(--accent) 12%, transparent),
-				transparent 32%
-			),
-			var(--page);
+		min-height: 100svh;
+		align-items: center;
+		padding: max(32px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right))
+			max(48px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left));
 	}
-	.error-card {
-		position: relative;
-		z-index: 1;
+	section {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
 		width: min(100%, 560px);
-		padding: clamp(28px, 6vw, 64px);
-		border: 1.5px solid var(--line);
-		border-radius: 35px 20px 35px 20px / 20px 35px 20px 35px;
+		margin-inline: auto;
 		text-align: center;
-		box-shadow: 8px 8px 0 color-mix(in srgb, var(--accent) 16%, transparent);
 	}
 	.error-code {
-		margin-top: 24px;
+		margin: 0 0 24px;
 		color: var(--accent);
 		font-family: var(--font-hero);
-		font-size: clamp(6rem, 24vw, 10rem);
-		line-height: 0.9;
-		letter-spacing: -0.08em;
+		font-size: clamp(6rem, 18vw, 9rem);
+		line-height: 1;
+		letter-spacing: -0.06em;
 	}
 	h1 {
-		margin: 22px 0 8px;
+		margin: 0;
 		color: var(--ink);
 		font-family: var(--font-hero);
-		font-size: clamp(1.6rem, 5vw, 2.4rem);
+		font-size: clamp(1.8rem, 6vw, 2.5rem);
+		line-height: 1.25;
 	}
-	p {
-		max-width: 34ch;
-		margin: 0 auto;
+	.error-message {
+		margin: 12px 0 32px;
 		color: var(--ink-muted);
-		font-size: 14px;
-		line-height: 1.7;
+		font-size: 1rem;
+		line-height: 1.6;
 	}
-	.error-actions {
-		display: flex;
-		justify-content: center;
-		gap: 12px;
-		margin-top: 28px;
-		flex-wrap: wrap;
-	}
-	.error-actions a,
-	.error-actions button {
+	a {
 		display: inline-flex;
-		min-height: 44px;
+		min-height: 48px;
 		align-items: center;
-		justify-content: center;
-		gap: 8px;
-		padding: 0 18px;
-		border-radius: 999px;
-		font-size: 13px;
-		font-weight: 700;
+		gap: 12px;
+		color: var(--accent);
+		font-size: 1rem;
 		text-decoration: none;
-		font-family: inherit;
-		cursor: pointer;
-		transition:
-			transform 180ms ease,
-			background-color 180ms ease;
 	}
-	.error-actions a:hover,
-	.error-actions button:hover {
-		transform: translateY(-2px);
+	a span {
+		text-decoration: underline;
+		text-decoration-thickness: 1px;
+		text-underline-offset: 6px;
 	}
-	.primary-action {
-		background: var(--accent);
-		color: var(--on-accent);
+	a:hover {
+		color: var(--accent-hover);
 	}
-	.secondary-action {
-		border: 1px solid var(--line);
-		background: transparent;
-		color: var(--ink);
-	}
-	.secondary-action:hover {
-		background: var(--surface-hover);
-	}
-	.error-orbit {
-		position: absolute;
-		width: min(70vw, 520px);
-		height: min(70vw, 520px);
-		border: 1px solid color-mix(in srgb, var(--accent) 18%, transparent);
-		border-radius: 48% 52% 44% 56%;
-		transform: rotate(-16deg);
-	}
-	@media (max-width: 480px) {
-		.error-page {
-			padding: 16px;
-		}
-		.error-card {
-			padding: 28px 20px;
-		}
-		.error-actions a,
-		.error-actions button {
-			flex: 1 1 140px;
-		}
-	}
-	@media (prefers-reduced-motion: reduce) {
-		.error-actions a,
-		.error-actions button {
-			transition: none;
-		}
+	svg {
+		width: 32px;
+		height: 24px;
+		stroke: currentColor;
+		stroke-width: 1.8;
+		stroke-linecap: round;
+		stroke-linejoin: round;
 	}
 </style>
