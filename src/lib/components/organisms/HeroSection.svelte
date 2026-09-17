@@ -3,6 +3,8 @@
 	import heroBanner from '$lib/assets/hero-banner.webp';
 	import ganyuBanner from '$lib/assets/ganyu-character.webp';
 	import { onMount } from 'svelte';
+	let { donationOpen, onOpenDonation }: { donationOpen: boolean; onOpenDonation: () => void } =
+		$props();
 	let hero: HTMLElement;
 	let paused = $state(false);
 	onMount(() => {
@@ -37,7 +39,7 @@
 				<path d="M370 390q0 7 7 7-7 0-7 7 0-7-7-7 7 0 7-7" />
 			</svg>
 		</div>
-		<div class="hero-text"><HeroIntro /></div>
+		<div class="hero-text"><HeroIntro {donationOpen} {onOpenDonation} /></div>
 	</div>
 </section>
 

@@ -1,5 +1,8 @@
 <script lang="ts">
 	import { navigateSection } from '$lib/navigation';
+
+	let { donationOpen, onOpenDonation }: { donationOpen: boolean; onOpenDonation: () => void } =
+		$props();
 </script>
 
 <div class="hero-intro z-10 flex flex-col gap-6">
@@ -44,7 +47,7 @@
 			<a
 				href="https://github.com/chiraitori"
 				aria-label="GitHub"
-				class="social-link rounded-full p-2 text-current transition-colors hover:bg-current/8"
+				class="social-link rounded-full p-2 text-current"
 			>
 				<svg
 					class="social-icon h-5 w-5"
@@ -64,7 +67,7 @@
 			<a
 				href="https://discord.com/users/685716988471148552"
 				aria-label="Discord"
-				class="social-link rounded-full p-2 text-current transition-colors hover:bg-current/8"
+				class="social-link rounded-full p-2 text-current"
 			>
 				<svg
 					class="social-icon h-5 w-5"
@@ -94,7 +97,7 @@
 			<a
 				href="mailto:mail@chiraitori.io.vn"
 				aria-label="Email"
-				class="social-link rounded-full p-2 text-current transition-colors hover:bg-current/8"
+				class="social-link rounded-full p-2 text-current"
 			>
 				<svg
 					class="social-icon h-5 w-5"
@@ -111,6 +114,33 @@
 					<polyline points="22,6 12,13 2,6"></polyline>
 				</svg>
 			</a>
+			<button
+				type="button"
+				aria-label="Open donation options"
+				aria-haspopup="dialog"
+				aria-expanded={donationOpen}
+				class="social-link donate-trigger rounded-full p-2 text-current"
+				title="Buy me a cup"
+				onclick={onOpenDonation}
+			>
+				<svg
+					class="social-icon h-6 w-6"
+					viewBox="0 0 32 32"
+					aria-hidden="true"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="1.8"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+				>
+					<path d="M5 11.5c5.5-.6 14.3-.6 20 0l-1.6 15.1c-4.1.8-12.1.8-16.2 0L5 11.5Z" />
+					<path d="M5 11.5c4.9 1.1 15.2 1.1 20 0M8 15.4c4.3.6 10.7.6 14.1.1" />
+					<path
+						d="M10 5.7c-1.1 1.3-.9 2.4.1 3.4M16.2 4.1c-1.4 1.9-1.3 3.3.1 5M22 5.6c-1.1 1.2-1 2.4-.1 3.4"
+					/>
+					<path d="M11.2 20.2c.2 1.2.6 2.5 1.2 3.4" />
+				</svg>
+			</button>
 		</div>
 	</div>
 </div>
@@ -137,11 +167,42 @@
 		color: var(--on-accent);
 	}
 	.social-link {
+		position: relative;
+		isolation: isolate;
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
 		min-width: 44px;
 		min-height: 44px;
+		transition: color 180ms ease;
+	}
+	.social-link::before {
+		content: '';
+		position: absolute;
+		z-index: -1;
+		inset: 2px;
+		border-radius: 50%;
+		background: radial-gradient(circle, var(--nav-bleed) 28%, transparent 73%);
+		filter: blur(5px);
+		opacity: 0;
+		pointer-events: none;
+		transition: opacity 180ms ease;
+	}
+	@media (hover: hover) and (pointer: fine) {
+		.social-link:hover {
+			color: var(--accent);
+		}
+		.social-link:hover::before {
+			opacity: 1;
+		}
+	}
+	.social-link:focus-visible {
+		color: var(--accent);
+		outline: 2px solid var(--accent);
+		outline-offset: 2px;
+	}
+	.social-link:focus-visible::before {
+		opacity: 1;
 	}
 	.hero-title {
 		margin: 0;
@@ -160,12 +221,6 @@
 
 	.social-icon {
 		filter: url(#rough);
-		transform-origin: center;
-		transition: transform 180ms ease;
-	}
-
-	.social-link:hover .social-icon {
-		transform: scale(1.15) rotate(4deg);
 	}
 
 	.hand-drawn-btn {

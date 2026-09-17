@@ -122,7 +122,7 @@
 						>Industrial University of Ho Chi Minh City</a
 					></Tooltip
 				>
-				at the third year at the university. Rn i'm iterresting about cosplay i think will be debut soon.
+				at the fourth year at the university. Rn i'm iterresting about cosplay i think will be debut soon.
 			</p>
 		</div>
 	</div>

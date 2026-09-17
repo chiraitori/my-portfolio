@@ -5,6 +5,7 @@
 	import WorkShowcase from '$lib/components/organisms/WorkShowcase.svelte';
 	import PostModal from '$lib/components/organisms/PostModal.svelte';
 	import DiscordStatusCard from '$lib/components/molecules/DiscordStatusCard.svelte';
+	import DonateSheet from '$lib/components/molecules/DonateSheet.svelte';
 	import ViewersCard from '$lib/components/molecules/ViewersCard.svelte';
 	import { getCustomActivityIcon } from '$lib/data/activity-icons';
 	import { getCrunchyrollInfo } from '$lib/data/crunchyroll';
@@ -20,6 +21,7 @@
 	import { onMount } from 'svelte';
 
 	let selectedPost = $state<Post | null>(null);
+	let donationOpen = $state(false);
 
 	let lanyardData = $state<LanyardData | null>(null);
 	let presenceUnavailable = $state(false);
@@ -384,7 +386,7 @@
 	<div class="grid grid-cols-1 items-start gap-8 lg:grid-cols-[minmax(0,1fr)_280px] lg:gap-8">
 		<!-- Hero Section -->
 		<div class="order-1 lg:col-start-1 lg:row-start-1 flex flex-col min-w-0">
-			<HeroSection />
+			<HeroSection {donationOpen} onOpenDonation={() => (donationOpen = true)} />
 		</div>
 
 		<!-- Sidebar Column (Sticky on desktop, middle on mobile) -->
@@ -403,6 +405,8 @@
 </main>
 
 <SiteFooter />
+
+<DonateSheet open={donationOpen} close={() => (donationOpen = false)} />
 
 {#if selectedPost}
 	<PostModal post={selectedPost} close={() => (selectedPost = null)} />

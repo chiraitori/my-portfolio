@@ -41,7 +41,7 @@
 		<h2 class="font-sans text-2xl font-bold text-[var(--ink)]">Recent posts</h2>
 	</div>
 
-	<div class="grid min-w-0 grid-cols-1 items-start gap-6 xl:grid-cols-[200px_minmax(0,1fr)]">
+	<div class="posts-layout grid min-w-0 items-start gap-6">
 		<PostFilters {tags} bind:searchTerm bind:selectedTag />
 
 		<div class="flex min-w-0 flex-col gap-5">
@@ -90,5 +90,15 @@
 	}
 	.results-badge-dot {
 		background: var(--accent);
+	}
+	.posts-layout {
+		grid-template-columns: minmax(0, 1fr);
+	}
+	/* Keep touch layouts in one column even when a phone browser reports a
+	   wide CSS viewport because of zoom or desktop-site emulation. */
+	@media (min-width: 1024px) and (pointer: fine) {
+		.posts-layout {
+			grid-template-columns: 220px minmax(0, 1fr);
+		}
 	}
 </style>
