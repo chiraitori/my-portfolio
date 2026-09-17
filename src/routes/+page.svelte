@@ -31,6 +31,7 @@
 		const discordUserId = '685716988471148552';
 		let socket: WebSocket | null = null;
 		let disposed = false;
+		let pageFrozen = false;
 		let heartbeatTimer: number | undefined;
 		let reconnectTimer: number | undefined;
 		let connectionTimeout: number | undefined;
@@ -104,7 +105,7 @@
 			});
 
 		const scheduleReconnect = (delayOverride?: number) => {
-			if (disposed || reconnectTimer !== undefined) return;
+			if (disposed || pageFrozen || reconnectTimer !== undefined) return;
 			const baseDelay =
 				delayOverride ?? Math.min(30_000, 750 * 2 ** Math.min(reconnectAttempts, 5));
 			const jitter = delayOverride === undefined ? Math.round(baseDelay * Math.random() * 0.25) : 0;
@@ -116,7 +117,7 @@
 		};
 
 		const connect = () => {
-			if (disposed) return;
+			if (disposed || pageFrozen) return;
 			if (
 				socket &&
 				(socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING)
@@ -131,7 +132,7 @@
 			}, 15_000);
 
 			nextSocket.onmessage = (event) => {
-				if (disposed) return;
+				if (disposed || pageFrozen || socket !== nextSocket) return;
 				let message;
 				try {
 					message = JSON.parse(event.data);
@@ -179,30 +180,58 @@
 				}
 			};
 
-			nextSocket.onerror = () => nextSocket.close();
+			nextSocket.onerror = () => {
+				if (socket === nextSocket) nextSocket.close();
+			};
 			nextSocket.onclose = () => {
+				if (socket !== nextSocket) return;
+				socket = null;
 				clearHeartbeat();
 				if (connectionTimeout !== undefined) {
 					window.clearTimeout(connectionTimeout);
 					connectionTimeout = undefined;
 				}
-				if (disposed) return;
+				if (disposed || pageFrozen) return;
 				if (!lanyardData) presenceUnavailable = true;
-				if (socket === nextSocket) socket = null;
 				const delay = reconnectDelayOverride;
 				reconnectDelayOverride = undefined;
 				scheduleReconnect(delay);
 			};
 		};
 
+		const pauseConnection = () => {
+			pageFrozen = true;
+			reconnectDelayOverride = undefined;
+			clearHeartbeat();
+			if (reconnectTimer !== undefined) {
+				window.clearTimeout(reconnectTimer);
+				reconnectTimer = undefined;
+			}
+			if (connectionTimeout !== undefined) {
+				window.clearTimeout(connectionTimeout);
+				connectionTimeout = undefined;
+			}
+			const oldSocket = socket;
+			socket = null;
+			if (oldSocket && oldSocket.readyState < WebSocket.CLOSING) oldSocket.close();
+		};
+
+		const resumeConnection = () => {
+			if (!pageFrozen || disposed) return;
+			pageFrozen = false;
+			reconnectAttempts = 0;
+			connect();
+		};
+
+		window.addEventListener('pagehide', pauseConnection);
+		window.addEventListener('pageshow', resumeConnection);
 		connect();
 
 		return () => {
 			disposed = true;
-			clearHeartbeat();
-			if (reconnectTimer !== undefined) window.clearTimeout(reconnectTimer);
-			if (connectionTimeout !== undefined) window.clearTimeout(connectionTimeout);
-			socket?.close();
+			window.removeEventListener('pagehide', pauseConnection);
+			window.removeEventListener('pageshow', resumeConnection);
+			pauseConnection();
 		};
 	});
 
