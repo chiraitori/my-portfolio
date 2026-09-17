@@ -30,13 +30,13 @@
 		},
 		{
 			label: 'GitHub Sponsors',
-			description: 'Ủng hộ qua GitHub',
+			description: 'Support me on GitHub',
 			icon: 'github',
 			href: 'https://github.com/sponsors/chiraitori'
 		},
 		{
 			label: 'PayPal',
-			description: 'Gửi qua PayPal',
+			description: 'Send via PayPal',
 			icon: 'paypal',
 			href: 'https://paypal.me/chiraitori'
 		}
