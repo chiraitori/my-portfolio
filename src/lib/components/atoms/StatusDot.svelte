@@ -19,12 +19,6 @@
 	aria-hidden="true"
 >
 	<span
-		class="h-1.5 w-1.5 rounded-full {status.dotColorClass} {[
-			'Online',
-			'Idle',
-			'Do Not Disturb'
-		].includes(status.text)
-			? 'animate-pulse'
-			: ''}"
+		class="h-1.5 w-1.5 rounded-full {status.dotColorClass}"
 	></span>
 </span>
