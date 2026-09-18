@@ -82,11 +82,15 @@
 				body: JSON.stringify({ amount, message: donorMessage.trim() }),
 				signal: checkoutAbort.signal
 			});
-			const result: { checkoutUrl?: string; message?: string } = await response.json();
-			if (!response.ok || !result.checkoutUrl) {
-				throw new Error(result.message || 'Không tạo được link thanh toán.');
+			const result: unknown = await response.json().catch(() => null);
+			if (!result || typeof result !== 'object') {
+				throw new Error('Máy chủ thanh toán đang gặp lỗi. Vui lòng thử lại sau.');
 			}
-			window.location.assign(result.checkoutUrl);
+			const { checkoutUrl, message } = result as { checkoutUrl?: string; message?: string };
+			if (!response.ok || !checkoutUrl) {
+				throw new Error(message || 'Không tạo được link thanh toán.');
+			}
+			window.location.assign(checkoutUrl);
 		} catch (error) {
 			if (error instanceof DOMException && error.name === 'AbortError') return;
 			payosError = error instanceof Error ? error.message : 'Không kết nối được PayOS.';
