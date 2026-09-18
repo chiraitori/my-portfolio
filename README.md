@@ -39,3 +39,7 @@ Create a PayOS payment channel, then add these **encrypted secrets** to the Clou
 - `WEBHOOK_URL` (Discord webhook)
 
 Apply D1 migrations with `npm run db:migrate:local` for local development and `npm run db:migrate:remote` for production. Set the PayOS payment channel webhook URL to `https://new-portfolio-v2.pages.dev/api/donations/payos/webhook` after deployment (or use the new portfolio's custom domain if one is configured). Redeploy after setting the secrets. For local testing, put the same names in a git-ignored `.env` or `.dev.vars` file. Do not commit or send the values through chat. Until the credentials and DB binding are configured, PayOS cannot create a checkout. A successful payment needs an internet-accessible webhook URL to deliver the Discord message.
+
+## Direct bank transfer
+
+The Bank transfer option displays a local VietQR image for the Techcombank account and a copy button for its number. Visitors choose the amount and transfer note in their banking app. This option does not create an order, confirm payment on the site, or send a donation message; PayOS remains available for an optional message and automatic confirmation.
