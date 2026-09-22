@@ -1,10 +1,18 @@
 <script lang="ts">
+	import { holidayThemes, type Season } from '$lib/seasonal';
 	import HeroIntro from '$lib/components/molecules/HeroIntro.svelte';
 	import heroBanner from '$lib/assets/hero-banner.webp';
 	import ganyuBanner from '$lib/assets/ganyu-character.webp';
 	import { onMount } from 'svelte';
-	let { donationOpen, onOpenDonation }: { donationOpen: boolean; onOpenDonation: () => void } =
-		$props();
+	let {
+		donationOpen,
+		onOpenDonation,
+		season = null
+	}: {
+		donationOpen: boolean;
+		onOpenDonation: () => void;
+		season?: Season | null;
+	} = $props();
 	let hero: HTMLElement;
 	let paused = $state(false);
 	onMount(() => {
@@ -39,13 +47,42 @@
 				<path d="M370 390q0 7 7 7-7 0-7 7 0-7-7-7 7 0 7-7" />
 			</svg>
 		</div>
-		<div class="hero-text"><HeroIntro {donationOpen} {onOpenDonation} /></div>
+		<div class="hero-text"><HeroIntro {season} {donationOpen} {onOpenDonation} /></div>
+		{#if season}
+			<div class="holiday-corner" aria-hidden="true">
+				<img src={holidayThemes[season].artwork} width="180" height="210" alt="" />
+				<span>{holidayThemes[season].caption}</span>
+			</div>
+		{/if}
 	</div>
 </section>
 
 <style>
 	.hero-section {
 		min-width: 0;
+	}
+	.holiday-corner {
+		position: absolute;
+		right: 8px;
+		bottom: 18px;
+		width: clamp(100px, 17%, 154px);
+		text-align: center;
+		pointer-events: none;
+	}
+	.holiday-corner img {
+		width: 100%;
+		height: auto;
+	}
+	.holiday-corner span {
+		display: block;
+		color: var(--festive-green);
+		font-size: 12px;
+		transform: rotate(-5deg);
+	}
+	@media (max-width: 767px) {
+		.holiday-corner {
+			display: none;
+		}
 	}
 	.hero-banner {
 		--art-source: var(--portrait-source);

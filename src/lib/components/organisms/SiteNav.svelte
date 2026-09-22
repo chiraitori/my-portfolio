@@ -1,10 +1,13 @@
 <script lang="ts">
+	import { type Season } from '$lib/seasonal';
 	import glazelily from '$lib/assets/glazelily.png';
 	import sunIcon from '$lib/assets/sun.svg';
 	import moonIcon from '$lib/assets/moon.svg';
 	import RoughTextFilter from '$lib/components/atoms/RoughTextFilter.svelte';
+	import HolidayGarland from '$lib/components/atoms/HolidayGarland.svelte';
 	import { onMount, tick } from 'svelte';
 	import { navigateSection } from '$lib/navigation';
+	let { season = null }: { season?: Season | null } = $props();
 
 	const navItems = [
 		{ label: 'Home', href: '#home', icon: 'home' },
@@ -151,6 +154,24 @@
 		>
 			<img src={glazelily} class="ganyu-icon-only" alt="Glaze Lily" aria-hidden="true" />
 			<span class="default-icon-only brand-at">@</span>
+			{#if season === 'christmas'}
+				<svg class="santa-hat" viewBox="0 0 44 34" aria-hidden="true">
+					<path
+						d="M7 24C10 12 16 3 26 4c7 0 11 7 10 16l-6-1c1-6-2-8-5-6l4 12Z"
+						fill="var(--festive-red)"
+						stroke="var(--festive-red)"
+						stroke-width="2"
+						stroke-linejoin="round"
+					/>
+					<path
+						d="M6 23q11-3 24 0l-1 7q-11-3-24 0Z"
+						fill="#fff8ee"
+						stroke="#d9cec6"
+						stroke-width="1.3"
+					/>
+					<circle cx="35" cy="21" r="5" fill="#fff8ee" stroke="#d9cec6" stroke-width="1.3" />
+				</svg>
+			{/if}
 		</button>
 		<a
 			class="brand-name"
@@ -247,6 +268,7 @@
 		</button>
 	</div>
 	<RoughTextFilter />
+	{#if season}<HolidayGarland {season} />{/if}
 </header>
 
 <nav
@@ -350,6 +372,7 @@
 		align-items: center;
 	}
 	.theme-toggle {
+		position: relative;
 		display: grid;
 		width: 44px;
 		height: 44px;
@@ -364,6 +387,15 @@
 		width: 34px;
 		height: 34px;
 		object-fit: contain;
+	}
+	.santa-hat {
+		position: absolute;
+		width: 34px;
+		height: 27px;
+		top: -7px;
+		left: 9px;
+		transform: rotate(14deg);
+		pointer-events: none;
 	}
 	@media (hover: hover) and (pointer: fine) {
 		.theme-toggle:hover {

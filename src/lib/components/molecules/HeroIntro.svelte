@@ -1,12 +1,23 @@
 <script lang="ts">
+	import { holidayThemes, type Season } from '$lib/seasonal';
 	import { navigateSection } from '$lib/navigation';
 
-	let { donationOpen, onOpenDonation }: { donationOpen: boolean; onOpenDonation: () => void } =
-		$props();
+	let {
+		donationOpen,
+		onOpenDonation,
+		season = null
+	}: {
+		donationOpen: boolean;
+		onOpenDonation: () => void;
+		season?: Season | null;
+	} = $props();
 </script>
 
 <div class="hero-intro z-10 flex flex-col gap-6">
 	<div class="flex flex-col gap-2">
+		{#if season}
+			<p class="holiday-note"><span aria-hidden="true">✧</span> {holidayThemes[season].hero}</p>
+		{/if}
 		<h1 class="hero-title select-none">
 			Hi there~ <br />
 			I'm Chiraitori~
@@ -146,6 +157,17 @@
 </div>
 
 <style>
+	.holiday-note {
+		margin: 0 0 10px;
+		color: var(--festive-red);
+		font-size: 13px;
+		font-weight: 600;
+		letter-spacing: 0.02em;
+	}
+	.holiday-note span {
+		color: var(--festive-gold);
+		margin-right: 5px;
+	}
 	.hero-connect {
 		flex-wrap: wrap;
 	}

@@ -1,5 +1,7 @@
 <script lang="ts">
 	import HeroSection from '$lib/components/organisms/HeroSection.svelte';
+	import HolidaySeason from '$lib/components/molecules/HolidaySeason.svelte';
+	import { getSeason, type Season } from '$lib/seasonal';
 	import SiteFooter from '$lib/components/organisms/SiteFooter.svelte';
 	import SiteNav from '$lib/components/organisms/SiteNav.svelte';
 	import WorkShowcase from '$lib/components/organisms/WorkShowcase.svelte';
@@ -22,6 +24,24 @@
 
 	let selectedPost = $state<Post | null>(null);
 	let donationOpen = $state(false);
+	let season = $state<Season | null>(null);
+
+	onMount(() => {
+		// Local previews never override the calendar on the deployed site.
+		const preview = import.meta.env.DEV
+			? new URLSearchParams(window.location.search).get('season')
+			: null;
+		const previewSeason =
+			preview === 'christmas' || preview === 'new-year' || preview === 'tet' ? preview : null;
+		const updateSeason = () => (season = previewSeason ?? getSeason());
+		updateSeason();
+		const timer = window.setInterval(updateSeason, 60_000);
+		document.addEventListener('visibilitychange', updateSeason);
+		return () => {
+			window.clearInterval(timer);
+			document.removeEventListener('visibilitychange', updateSeason);
+		};
+	});
 
 	let lanyardData = $state<LanyardData | null>(null);
 	let presenceUnavailable = $state(false);
@@ -409,13 +429,16 @@
 	/>
 </svelte:head>
 
-<SiteNav />
+<SiteNav {season} />
+{#if season}
+	{#key season}<HolidaySeason {season} />{/key}
+{/if}
 
 <main id="home" class="mx-auto flex w-full max-w-[1320px] flex-col px-4 pb-12 sm:px-6 lg:px-8">
 	<div class="grid grid-cols-1 items-start gap-8 lg:grid-cols-[minmax(0,1fr)_280px] lg:gap-8">
 		<!-- Hero Section -->
 		<div class="order-1 lg:col-start-1 lg:row-start-1 flex flex-col min-w-0">
-			<HeroSection {donationOpen} onOpenDonation={() => (donationOpen = true)} />
+			<HeroSection {season} {donationOpen} onOpenDonation={() => (donationOpen = true)} />
 		</div>
 
 		<!-- Sidebar Column (Sticky on desktop, middle on mobile) -->
@@ -433,7 +456,7 @@
 	</div>
 </main>
 
-<SiteFooter />
+<SiteFooter {season} />
 
 <DonateSheet open={donationOpen} close={() => (donationOpen = false)} />
 

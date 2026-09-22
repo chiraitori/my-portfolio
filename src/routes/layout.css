@@ -35,6 +35,10 @@
 
 :root {
 	--theme-origin-x: 28px;
+	--festive-red: #ab4e60;
+	--festive-green: #4b725c;
+	--festive-gold: #b38a42;
+	--festive-snow: #b1bdc4;
 	--theme-origin-y: 32px;
 	font-family: var(--font-sans);
 	color-scheme: light;
@@ -76,7 +80,7 @@ html {
 
 body {
 	margin: 0;
-	min-width: 320px;
+	min-width: min(320px, 100%);
 	background: var(--page);
 	transition:
 		background 350ms ease,
@@ -227,6 +231,10 @@ html.transitioning-to-light::view-transition-new(root) {
 }
 html.dark {
 	color-scheme: dark;
+	--festive-red: #eaa1ab;
+	--festive-green: #a1c9b1;
+	--festive-gold: #eac77f;
+	--festive-snow: #eef5ff;
 	--page: #1b171c;
 	--surface: #262027;
 	--surface-hover: #302630;

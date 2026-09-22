@@ -1,5 +1,7 @@
 <script lang="ts">
+	import { holidayThemes, type Season } from '$lib/seasonal';
 	import { navigateSection } from '$lib/navigation';
+	let { season = null }: { season?: Season | null } = $props();
 	const year = new Date().getFullYear();
 </script>
 
@@ -12,7 +14,11 @@
 				onclick={(event) => navigateSection(event, '#home')}
 				aria-label="chiraitori.dev home">chiraitori.dev</a
 			>
-			<p>Thanks for stopping by. See you around the internet.</p>
+			<p>
+				{season
+					? holidayThemes[season].footer
+					: 'Thanks for stopping by. See you around the internet.'}
+			</p>
 		</div>
 
 		<div class="footer-actions">
@@ -36,7 +42,7 @@
 
 	<div class="footer-meta">
 		<span>&copy; {year} Chiraitori</span>
-		<span>Made with SvelteKit and Love</span>
+		<span>{season ? holidayThemes[season].credit : 'Made with SvelteKit and Love'}</span>
 	</div>
 </footer>
 

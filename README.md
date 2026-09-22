@@ -21,6 +21,12 @@ npm run dev
 - `static/` — files served by URL, including the easter egg audio.
 - `migrations/` — D1 schema for viewer analytics and donations.
 
+## Seasonal decorations
+
+The homepage automatically shows Christmas decorations December 1–25, New Year decorations December 26–January 7, and Tết decorations from lunar December 23 through lunar January 10. Dates use `Asia/Ho_Chi_Minh`; Tết uses the Vietnamese lunar calendar from `lunar-date-vn` and takes priority if dates overlap. Outside those windows, decorations and particle effects are not mounted. New Year and Tết include a live countdown to midnight in Vietnam, then show a greeting throughout the celebration window. Rules and copy live in `src/lib/seasonal.ts`.
+
+With the local dev server, use `/?season=christmas`, `/?season=new-year`, or `/?season=tet` to preview each theme. These overrides are disabled in production. Remove the query string to return to the real calendar. Effects respect reduced motion and save an independent on/off preference for each season.
+
 ## External data
 
 Pinned projects are fetched from `gh.chiraitori.dev`. Discord presence uses the Lanyard WebSocket. Viewer counts use the `/api/viewers` route and the D1 database bound as `DB` in `wrangler.toml`.
