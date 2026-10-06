@@ -154,11 +154,4 @@
 	:global(html.dark) .github-link:focus-visible {
 		outline-color: #e8a7b5;
 	}
-
-	:global(html.ganyu-theme) .github-link:hover {
-		color: #4b6790;
-	}
-	:global(html.ganyu-theme) .github-link:focus-visible {
-		outline-color: #759dca;
-	}
 </style>

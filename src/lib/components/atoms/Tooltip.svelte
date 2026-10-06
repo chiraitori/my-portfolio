@@ -33,14 +33,3 @@
 {:else}
 	{@render children()}
 {/if}
-
-<style>
-	/* Ganyu theme overrides for Tooltip */
-	:global(html.ganyu-theme) .tooltip {
-		background-color: #4b6790;
-		color: #edf7fc;
-	}
-	:global(html.ganyu-theme) .tooltip span {
-		border-top-color: #4b6790;
-	}
-</style>

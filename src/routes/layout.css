@@ -135,11 +135,13 @@ html.theme-transitioning *::after {
 }
 
 html.transitioning-to-ganyu::view-transition-old(root),
+html.transitioning-to-evelyn::view-transition-old(root),
 html.transitioning-to-dark::view-transition-old(root) {
 	z-index: 1;
 }
 
 html.transitioning-to-ganyu::view-transition-new(root),
+html.transitioning-to-evelyn::view-transition-new(root),
 html.transitioning-to-dark::view-transition-new(root) {
 	z-index: 2;
 	animation: theme-reveal 850ms cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -281,6 +283,39 @@ html.dark.ganyu-theme {
 	--nav-bg: #131c2af2;
 	--nav-bleed: #314b69;
 	--scrollbar-thumb: #506d8d;
+}
+/* Evelyn: ivory, wine-red lining and warm charcoal. */
+html.evelyn-theme {
+	--page: #faf6ef;
+	--surface: #fffdf8;
+	--surface-hover: #f3eae5;
+	--ink: #322a2b;
+	--ink-muted: #76605d;
+	--line: #e3d5cb;
+	--accent: #973e4d;
+	--accent-hover: #7b2d3c;
+	--accent-soft: #f2dfe0;
+	--on-accent: #ffffff;
+	--shadow: #33272a0c;
+	--nav-bg: #faf6eff2;
+	--nav-bleed: #efc5bf;
+	--scrollbar-thumb: #ccaaa0;
+}
+html.dark.evelyn-theme {
+	--page: #1b1819;
+	--surface: #272123;
+	--surface-hover: #34282b;
+	--ink: #f4e9de;
+	--ink-muted: #c4aea9;
+	--line: #493639;
+	--accent: #eda1a4;
+	--accent-hover: #fac0ba;
+	--accent-soft: #462b32;
+	--on-accent: #2b1b20;
+	--shadow: #00000024;
+	--nav-bg: #1b1819f2;
+	--nav-bleed: #733540;
+	--scrollbar-thumb: #7c5056;
 }
 html,
 body {

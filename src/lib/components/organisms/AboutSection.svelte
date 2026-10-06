@@ -64,16 +64,16 @@
 			<div class="relative w-full aspect-square">
 				<!-- Background decorative blob -->
 				<div
-					class="absolute inset-0 bg-[#e5a6b5]/30 rounded-3xl transform rotate-3 scale-105 -z-10 transition-transform hover:rotate-6 ganyu-blob"
+					class="absolute inset-0 bg-[#e5a6b5]/30 rounded-3xl transform rotate-3 scale-105 -z-10 transition-transform hover:rotate-6 portrait-blob"
 				></div>
 				<!-- Fallback background color if image is missing -->
 				<div
-					class="absolute inset-0 bg-[#fcefe9] rounded-3xl border-2 border-[#302b30] shadow-[4px_4px_0px_0px_#302b30] -z-10 ganyu-border"
+					class="absolute inset-0 bg-[#fcefe9] rounded-3xl border-2 border-[#302b30] shadow-[4px_4px_0px_0px_#302b30] -z-10 portrait-border"
 				></div>
 				<img
 					src={avatarUrl}
 					alt="Chiraitori Avatar"
-					class="w-full h-full object-cover rounded-3xl border-2 border-[#302b30] shadow-[4px_4px_0px_0px_#302b30] ganyu-border"
+					class="w-full h-full object-cover rounded-3xl border-2 border-[#302b30] shadow-[4px_4px_0px_0px_#302b30] portrait-border"
 				/>
 			</div>
 			<div class="flex flex-col gap-0.5 mt-2 md:mt-4 text-center md:text-left">
@@ -140,30 +140,17 @@
 		font-size: 0.9em;
 		transition: background-color 200ms ease;
 	}
-	:global(html.ganyu-theme) .about-tag {
-		background-color: #e0f2fe;
-		color: #202747;
-	}
 	:global(html.dark) .about-tag {
 		background-color: #2e2624;
 		color: #e4e4e7;
 	}
 
-	:global(html.ganyu-theme) .ganyu-blob {
-		background-color: rgba(117, 157, 202, 0.2);
-	}
-
-	:global(html.ganyu-theme) .ganyu-border {
-		border-color: #4b6790;
-		box-shadow: 4px 4px 0px 0px #4b6790;
-	}
-
-	:global(html.dark) .ganyu-border {
+	:global(html.dark) .portrait-border {
 		border-color: #e4e4e7;
 		box-shadow: 4px 4px 0px 0px #e4e4e7;
 	}
 
-	:global(html.dark) .ganyu-blob {
+	:global(html.dark) .portrait-blob {
 		background-color: rgba(229, 166, 181, 0.2);
 	}
 </style>

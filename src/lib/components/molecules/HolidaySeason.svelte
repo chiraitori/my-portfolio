@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { holidayThemes, type Season } from '$lib/seasonal';
 	import TetBranch from '$lib/components/atoms/TetBranch.svelte';
+	import ChristmasSnowCanvas from '$lib/components/atoms/ChristmasSnowCanvas.svelte';
 	import HolidayCountdown from './HolidayCountdown.svelte';
 	let { season }: { season: Season } = $props();
 	const theme = $derived(holidayThemes[season]);
@@ -79,20 +80,36 @@
 					stroke-linejoin="round"
 				/>
 			{:else}
-				<g
-					fill="var(--festive-gold)"
-					fill-opacity=".4"
-					stroke="var(--festive-gold)"
-					stroke-width="1.3"
-				>
-					<ellipse cx="22" cy="10" rx="6" ry="8" /><ellipse cx="30" cy="16" rx="8" ry="6" /><ellipse
-						cx="27"
-						cy="26"
-						rx="6"
-						ry="8"
-					/><ellipse cx="16" cy="26" rx="6" ry="8" /><ellipse cx="13" cy="16" rx="8" ry="6" />
+				<defs>
+					<linearGradient id="greeting-mai-petal" x1="0" y1="1" x2="0" y2="0">
+						<stop offset="0" stop-color="#f0a81e" />
+						<stop offset=".5" stop-color="#fbcf33" />
+						<stop offset="1" stop-color="#fff0a6" />
+					</linearGradient>
+				</defs>
+				<!-- Bronze loc leaf and green leaf tucked behind the bloom -->
+				<path d="M20 29C12 31 7 28 5 22 13 21 18 24 20 29Z" fill="#b8613f" />
+				<path d="M7 24Q13 25 19 28" stroke="#8a3f27" stroke-width=".6" />
+				<path d="M24 29C32 32 38 29 40 23 32 22 26 24 24 29Z" fill="#8fb06a" />
+				<path d="M38 25Q31 26 25 28" stroke="#648446" stroke-width=".6" />
+				<g transform="translate(22 18) scale(.92)">
+					<g fill="#6f9a4a">
+						{#each [36, 108, 180, 252, 324] as r (r)}
+							<path d="M0 0-2.6-6.5 0-8.4 2.6-6.5Z" transform={`rotate(${r})`} />
+						{/each}
+					</g>
+					<g fill="url(#greeting-mai-petal)" stroke="#d39a1c" stroke-width=".6">
+						{#each [0, 72, 144, 216, 288] as r (r)}
+							<path
+								d="M0-1.5C-5.4-4.5-7.6-11.6-4.4-15.2C-2.2-17.4 2.2-17.4 4.4-15.2C7.6-11.6 5.4-4.5 0-1.5Z"
+								transform={`rotate(${r})`}
+							/>
+						{/each}
+					</g>
+					<circle r="7.2" stroke="#e8a52a" stroke-width=".5" />
+					<circle r="7.6" stroke="#b4501f" stroke-width="1.6" stroke-dasharray="1.1 1.9" />
+					<circle r="2.2" fill="#7ea24a" />
 				</g>
-				<circle cx="22" cy="19" r="5" fill="var(--festive-red)" />
 			{/if}
 		</svg>
 		<span>{theme.greeting}<span class="greeting-extra">{' '}{theme.extra}</span>~</span>
@@ -148,24 +165,28 @@
 {/if}
 
 {#if effectsEnabled && !reducedMotion}
-	<div
-		class="season-particles"
-		class:confetti={season === 'new-year'}
-		class:petals={season === 'tet'}
-		class:paused={pageHidden}
-		aria-hidden="true"
-	>
-		{#each particles as particle, i (i)}
-			<span
-				class="particle"
-				style:left={`${particle.x}%`}
-				style:--size={`${particle.size}px`}
-				style:--duration={`${particle.duration}s`}
-				style:--delay={`${particle.delay}s`}
-				style:--drift={`${particle.drift}px`}
-			></span>
-		{/each}
-	</div>
+	{#if season === 'christmas'}
+		<ChristmasSnowCanvas {pageHidden} />
+	{:else}
+		<div
+			class="season-particles"
+			class:confetti={season === 'new-year'}
+			class:petals={season === 'tet'}
+			class:paused={pageHidden}
+			aria-hidden="true"
+		>
+			{#each particles as particle, i (i)}
+				<span
+					class="particle"
+					style:left={`${particle.x}%`}
+					style:--size={`${particle.size}px`}
+					style:--duration={`${particle.duration}s`}
+					style:--delay={`${particle.delay}s`}
+					style:--drift={`${particle.drift}px`}
+				></span>
+			{/each}
+		</div>
+	{/if}
 {/if}
 
 <style>

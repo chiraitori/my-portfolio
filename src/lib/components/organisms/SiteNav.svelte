@@ -3,6 +3,7 @@
 	import glazelily from '$lib/assets/glazelily.png';
 	import sunIcon from '$lib/assets/sun.svg';
 	import moonIcon from '$lib/assets/moon.svg';
+	import evelynEmblem from '$lib/assets/evelyn-emblem.webp';
 	import RoughTextFilter from '$lib/components/atoms/RoughTextFilter.svelte';
 	import HolidayGarland from '$lib/components/atoms/HolidayGarland.svelte';
 	import { onMount, tick } from 'svelte';
@@ -17,16 +18,21 @@
 	] as const;
 
 	let activeHref = $state('#home');
-	let isGanyuTheme = $state(false);
+	const themes = ['default', 'ganyu', 'evelyn'] as const;
+	type Theme = (typeof themes)[number];
+	const themeNames = { default: 'Default', ganyu: 'Ganyu', evelyn: 'Evelyn' };
+	let currentTheme = $state<Theme>('default');
+	const nextTheme = $derived(themes[(themes.indexOf(currentTheme) + 1) % themes.length]);
 	let isDarkMode = $state(false);
 	let isThemeTransitioning = $state(false);
 	let dockOffset = $state(0);
 
-	function applyTheme(enabled: boolean) {
-		isGanyuTheme = enabled;
-		document.documentElement.classList.toggle('ganyu-theme', enabled);
+	function applyTheme(theme: Theme) {
+		currentTheme = theme;
+		document.documentElement.classList.toggle('ganyu-theme', theme === 'ganyu');
+		document.documentElement.classList.toggle('evelyn-theme', theme === 'evelyn');
 		try {
-			localStorage.setItem('portfolio-theme', enabled ? 'ganyu' : 'default');
+			localStorage.setItem('portfolio-theme', theme);
 		} catch {
 			/* Storage may be disabled. */
 		}
@@ -87,12 +93,8 @@
 	}
 
 	function toggleTheme(event: MouseEvent) {
-		const enabled = !isGanyuTheme;
-		return transitionTheme(
-			event,
-			enabled ? 'transitioning-to-ganyu' : 'transitioning-to-default',
-			() => applyTheme(enabled)
-		);
+		const theme = nextTheme;
+		return transitionTheme(event, `transitioning-to-${theme}`, () => applyTheme(theme));
 	}
 
 	function toggleDarkMode(event: MouseEvent) {
@@ -111,7 +113,11 @@
 
 	onMount(() => {
 		syncActiveHref();
-		isGanyuTheme = document.documentElement.classList.contains('ganyu-theme');
+		currentTheme = document.documentElement.classList.contains('evelyn-theme')
+			? 'evelyn'
+			: document.documentElement.classList.contains('ganyu-theme')
+				? 'ganyu'
+				: 'default';
 		isDarkMode = document.documentElement.classList.contains('dark');
 		let frame = 0;
 		const updateDock = () => {
@@ -145,14 +151,14 @@
 		<button
 			type="button"
 			class="theme-toggle"
-			class:active={isGanyuTheme}
+			class:active={currentTheme !== 'default'}
 			disabled={isThemeTransitioning}
-			aria-label={isGanyuTheme ? 'Use default theme' : 'Use Ganyu theme'}
-			aria-pressed={isGanyuTheme}
-			title={isGanyuTheme ? 'Back to default theme' : 'Switch to Ganyu theme'}
+			aria-label={`${themeNames[currentTheme]} theme. Switch to ${themeNames[nextTheme]} theme`}
+			title={`Switch to ${themeNames[nextTheme]} theme`}
 			onclick={toggleTheme}
 		>
 			<img src={glazelily} class="ganyu-icon-only" alt="Glaze Lily" aria-hidden="true" />
+			<img src={evelynEmblem} class="evelyn-icon-only" alt="" aria-hidden="true" />
 			<span class="default-icon-only brand-at">@</span>
 			{#if season === 'christmas'}
 				<svg class="santa-hat" viewBox="0 0 44 34" aria-hidden="true">
@@ -532,8 +538,14 @@
 	:global(html:not(.ganyu-theme)) .ganyu-icon-only {
 		display: none;
 	}
-	:global(html.ganyu-theme) .default-icon-only {
+	:global(html.ganyu-theme) .default-icon-only,
+	:global(html.evelyn-theme) .default-icon-only,
+	:global(html:not(.evelyn-theme)) .evelyn-icon-only {
 		display: none;
+	}
+	.theme-toggle .evelyn-icon-only {
+		width: 42px;
+		height: 30px;
 	}
 	:global(html:not(.dark)) .dark-icon-only {
 		display: none;

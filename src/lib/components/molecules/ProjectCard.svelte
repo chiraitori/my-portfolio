@@ -131,11 +131,4 @@
 	:global(html.dark) .project-card-interactive:focus-visible {
 		outline-color: #e8a7b5;
 	}
-
-	:global(html.ganyu-theme) .project-card-interactive:hover {
-		border-color: rgba(75, 103, 144, 0.45);
-	}
-	:global(html.ganyu-theme) .project-card-interactive:focus-visible {
-		outline-color: #759dca;
-	}
 </style>

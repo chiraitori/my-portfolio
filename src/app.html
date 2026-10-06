@@ -6,12 +6,16 @@
 		%sveltekit.head%
 		<script>
 			try {
-				if (localStorage.getItem('portfolio-theme') === 'ganyu') {
-					document.documentElement.classList.add('ganyu-theme');
+				const storedTheme = localStorage.getItem('portfolio-theme');
+				if (storedTheme === 'ganyu' || storedTheme === 'evelyn') {
+					document.documentElement.classList.add(`${storedTheme}-theme`);
 				}
-				
+
 				const storedDarkMode = localStorage.getItem('portfolio-dark-mode');
-				if (storedDarkMode === 'true' || (storedDarkMode === null && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+				if (
+					storedDarkMode === 'true' ||
+					(storedDarkMode === null && window.matchMedia('(prefers-color-scheme: dark)').matches)
+				) {
 					document.documentElement.classList.add('dark');
 				}
 			} catch (e) {}

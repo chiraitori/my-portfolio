@@ -97,6 +97,15 @@
 	:global(html.ganyu-theme) .hero-banner {
 		--art-source: var(--ganyu-source);
 	}
+	:global(html.dark:not(.ganyu-theme, .evelyn-theme)) .hero-banner {
+		--art-source: url('/images/hero-dark.webp');
+	}
+	:global(html.evelyn-theme) .hero-banner {
+		--art-source: url('/images/evelyn-light.webp');
+	}
+	:global(html.dark.evelyn-theme) .hero-banner {
+		--art-source: url('/images/evelyn-dark.webp');
+	}
 	.hero-scene {
 		position: absolute;
 		inset: 0 0 0 8%;
@@ -165,14 +174,20 @@
 		color: #fff9ff;
 		animation: sparkles-enter 1100ms ease-out 250ms both;
 	}
-	:global(html.dark) .scene-artwork {
+	:global(html.evelyn-theme) .scene-artwork {
+		background-position: 72% center;
+	}
+	:global(html.evelyn-theme) .scene-sparkles {
+		color: #e8c690;
+	}
+	:global(html.dark.ganyu-theme) .scene-artwork {
 		filter: brightness(0.65) saturate(0.8);
 	}
 	:global(html.dark) .hero-scene::after {
 		background: linear-gradient(
 			to right,
 			var(--page),
-			color-mix(in srgb, var(--page) 25%, transparent) 70%
+			color-mix(in srgb, var(--page) 8%, transparent) 70%
 		);
 	}
 	:global(html.dark) .scene-sparkles {
@@ -223,6 +238,9 @@
 		.hero-scene {
 			left: 24%;
 			opacity: 0.65;
+		}
+		:global(html.dark) .hero-scene {
+			opacity: 0.85;
 		}
 	}
 	@media (max-width: 639px) {
