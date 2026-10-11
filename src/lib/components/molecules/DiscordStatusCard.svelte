@@ -2,7 +2,7 @@
 	import ActivityImage from '$lib/components/atoms/ActivityImage.svelte';
 	import StatusDot from '$lib/components/atoms/StatusDot.svelte';
 	import type { PresenceActivityInfo, StatusInfo } from '$lib/types/portfolio';
-	import { fade, slide } from 'svelte/transition';
+	import { gsap } from 'gsap';
 
 	let {
 		status,
@@ -13,11 +13,42 @@
 	} = $props();
 
 	let progress = $state(0);
+	let progressRing = $state<SVGCircleElement | undefined>(undefined);
 	let spotifyActivity = $derived(activities.find((activity) => activity.kind === 'spotify'));
 	let spotifyTrackId = $derived(spotifyActivity?.id);
 	let spotifyStart = $derived(spotifyActivity?.timestamps?.start);
 	let spotifyEnd = $derived(spotifyActivity?.timestamps?.end);
 	let previousTrackId: string | undefined;
+	const transitionTweens = new WeakMap<HTMLElement, gsap.core.Tween>();
+
+	function gsapTransition(
+		node: HTMLElement,
+		{ duration = 260, offset = 6 }: { duration?: number; offset?: number } = {}
+	) {
+		transitionTweens.get(node)?.kill();
+		const tween = gsap.fromTo(
+			node,
+			{ autoAlpha: 0, y: offset },
+			{
+				autoAlpha: 1,
+				y: 0,
+				duration: duration / 1000,
+				ease: 'none',
+				paused: true,
+				immediateRender: false
+			}
+		);
+		transitionTweens.set(node, tween);
+
+		const reducedMotion =
+			typeof window !== 'undefined' &&
+			window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		return {
+			duration: reducedMotion ? 0 : duration,
+			easing: gsap.parseEase('power2.out'),
+			tick: (progress: number) => tween.progress(progress)
+		};
+	}
 
 	$effect(() => {
 		const trackId = spotifyTrackId;
@@ -51,6 +82,22 @@
 			window.cancelAnimationFrame(frameId);
 			window.clearInterval(timerId);
 		};
+	});
+
+	$effect(() => {
+		const ring = progressRing;
+		const targetOffset = 289.03 * (1 - progress);
+		if (!ring) return;
+
+		const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		const tween = gsap.to(ring, {
+			attr: { 'stroke-dashoffset': targetOffset },
+			duration: reducedMotion ? 0 : 0.24,
+			ease: 'none',
+			overwrite: 'auto'
+		});
+
+		return () => tween.kill();
 	});
 
 	function getFallbackInitials(activity: PresenceActivityInfo) {
@@ -117,7 +164,7 @@
 
 	{#if activities.length}
 		<div
-			transition:slide={{ duration: 300 }}
+			transition:gsapTransition={{ duration: 300, offset: 8 }}
 			class="presence-activity mt-1 flex flex-col gap-3 border-t border-[var(--line)] pt-3 text-xs text-[var(--ink-muted)]"
 		>
 			{#each activities as activity (activity.kind === 'spotify' ? 'spotify' : activity.id)}
@@ -144,67 +191,81 @@
 									class="spotify-ring-progress stroke-[#1db954]"
 									stroke-width="6"
 									stroke-dasharray="289.03"
-									stroke-dashoffset={289.03 - 289.03 * progress}
+									stroke-dashoffset="289.03"
 									stroke-linecap="round"
+									bind:this={progressRing}
 								/>
 							</svg>
 						{/if}
 
 						{#key `${activity.id}-${activity.imageUrl}-${activity.fallbackImageUrl}`}
-							<ActivityImage
-								transition:fade={{ duration: 240 }}
-								src={activity.imageUrl}
-								fallbackSrc={activity.fallbackImageUrl}
-								alt={activity.imageAlt}
-								initials={getFallbackInitials(activity)}
-								spotify={activity.kind === 'spotify'}
-								poster={activity.kind === 'crunchyroll'}
-							/>
+							<div
+								transition:gsapTransition={{ duration: 240, offset: 3 }}
+								class="absolute inset-0 flex items-center justify-center"
+							>
+								<ActivityImage
+									src={activity.imageUrl}
+									fallbackSrc={activity.fallbackImageUrl}
+									alt={activity.imageAlt}
+									initials={getFallbackInitials(activity)}
+									spotify={activity.kind === 'spotify'}
+									poster={activity.kind === 'crunchyroll'}
+								/>
+							</div>
 						{/key}
 					</div>
 
-					<div class="flex min-w-0 flex-col">
-						<span
-							class={activity.kind === 'spotify'
-								? 'text-[9px] font-semibold tracking-wider text-[#1db954] uppercase'
-								: activity.kind === 'crunchyroll'
-									? 'text-[9px] font-semibold tracking-wider text-[var(--accent)] uppercase'
-									: 'text-[9px] font-semibold tracking-wider text-[#68b78d] uppercase'}
-						>
-							{activity.label}
-						</span>
+					<div class="grid min-w-0 flex-1 items-center">
+						{#key activity.id}
+							<div
+								transition:gsapTransition={{ duration: 240, offset: 5 }}
+								class="col-start-1 row-start-1 flex min-w-0 flex-col"
+							>
+								<span
+									class={activity.kind === 'spotify'
+										? 'text-[9px] font-semibold tracking-wider text-[#1db954] uppercase'
+										: activity.kind === 'crunchyroll'
+											? 'text-[9px] font-semibold tracking-wider text-[var(--accent)] uppercase'
+											: 'text-[9px] font-semibold tracking-wider text-[#68b78d] uppercase'}
+								>
+									{activity.label}
+								</span>
 
-						{#if activity.href}
-							<a
-								href={activity.href}
-								target="_blank"
-								rel="noopener noreferrer"
-								class="truncate text-xs font-semibold text-[var(--ink)] transition-colors hover:text-[#1db954] hover:underline dark:hover:text-[#1db954]"
-							>
-								{activity.title}
-							</a>
-						{:else}
-							<span
-								class={activity.kind === 'crunchyroll'
-									? 'text-xs font-semibold break-words text-[var(--ink)]'
-									: 'truncate text-xs font-semibold text-[var(--ink)]'}
-							>
-								{activity.title}
-							</span>
-						{/if}
+								{#if activity.href}
+									<a
+										href={activity.href}
+										target="_blank"
+										rel="noopener noreferrer"
+										class="truncate text-xs font-semibold text-[var(--ink)] transition-colors hover:text-[#1db954] hover:underline dark:hover:text-[#1db954]"
+									>
+										{activity.title}
+									</a>
+								{:else}
+									<span
+										class={activity.kind === 'crunchyroll'
+											? 'text-xs font-semibold break-words text-[var(--ink)]'
+											: 'truncate text-xs font-semibold text-[var(--ink)]'}
+									>
+										{activity.title}
+									</span>
+								{/if}
 
-						{#if activity.episode}
-							<span class="text-[11px] font-semibold text-[var(--accent)]">{activity.episode}</span>
-						{/if}
-						{#if activity.subtitle}
-							<span
-								class={activity.kind === 'crunchyroll'
-									? 'text-[11px] break-words whitespace-normal text-[var(--ink-muted)]'
-									: 'truncate text-[11px] text-[var(--ink-muted)]'}
-							>
-								{activity.subtitle}
-							</span>
-						{/if}
+								{#if activity.episode}
+									<span class="text-[11px] font-semibold text-[var(--accent)]"
+										>{activity.episode}</span
+									>
+								{/if}
+								{#if activity.subtitle}
+									<span
+										class={activity.kind === 'crunchyroll'
+											? 'text-[11px] break-words whitespace-normal text-[var(--ink-muted)]'
+											: 'truncate text-[11px] text-[var(--ink-muted)]'}
+									>
+										{activity.subtitle}
+									</span>
+								{/if}
+							</div>
+						{/key}
 					</div>
 				</div>
 			{/each}
@@ -213,14 +274,6 @@
 </div>
 
 <style>
-	.spotify-ring-progress {
-		transition: stroke-dashoffset 250ms linear;
-	}
-	@media (prefers-reduced-motion: reduce) {
-		.spotify-ring-progress {
-			transition: none;
-		}
-	}
 	@media (max-width: 1023px) {
 		.presence-card {
 			padding: 14px 18px;
