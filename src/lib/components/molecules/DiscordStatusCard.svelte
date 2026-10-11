@@ -2,7 +2,7 @@
 	import ActivityImage from '$lib/components/atoms/ActivityImage.svelte';
 	import StatusDot from '$lib/components/atoms/StatusDot.svelte';
 	import type { PresenceActivityInfo, StatusInfo } from '$lib/types/portfolio';
-	import { slide } from 'svelte/transition';
+	import { fade, slide } from 'svelte/transition';
 
 	let {
 		status,
@@ -13,29 +13,49 @@
 	} = $props();
 
 	let progress = $state(0);
+	let elapsedMs = $state(0);
 	let spotifyActivity = $derived(activities.find((activity) => activity.kind === 'spotify'));
+	let spotifyStart = $derived(spotifyActivity?.timestamps?.start);
+	let spotifyEnd = $derived(spotifyActivity?.timestamps?.end);
 
 	$effect(() => {
-		if (!spotifyActivity?.timestamps) {
+		const start = spotifyStart;
+		const end = spotifyEnd;
+		if (start === undefined || end === undefined) {
 			progress = 0;
+			elapsedMs = 0;
 			return;
 		}
+		// A new track gets a fresh timeline; populate its live position next frame.
+		progress = 0;
+		elapsedMs = 0;
 
-		let frameId: number;
 		const updateProgress = () => {
-			if (!spotifyActivity?.timestamps) return;
-			const { start, end } = spotifyActivity.timestamps;
 			const total = end - start;
-			const current = Date.now() - start;
-			progress =
-				Number.isFinite(total) && total > 0 ? Math.min(Math.max(current / total, 0), 1) : 0;
-			frameId = requestAnimationFrame(updateProgress);
+			if (!Number.isFinite(start) || !Number.isFinite(end) || total <= 0) {
+				elapsedMs = 0;
+				progress = 0;
+				return;
+			}
+
+			const current = Math.min(Math.max(Date.now() - start, 0), total);
+			elapsedMs = current;
+			progress = current / total;
 		};
 
-		frameId = requestAnimationFrame(updateProgress);
+		const frameId = window.requestAnimationFrame(updateProgress);
+		const timerId = window.setInterval(updateProgress, 1000);
 
-		return () => cancelAnimationFrame(frameId);
+		return () => {
+			window.cancelAnimationFrame(frameId);
+			window.clearInterval(timerId);
+		};
 	});
+
+	function formatTime(milliseconds: number) {
+		const seconds = Math.floor(Math.max(0, milliseconds) / 1000);
+		return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
+	}
 
 	function getFallbackInitials(activity: PresenceActivityInfo) {
 		if (activity.kind === 'crunchyroll') return 'CR';
@@ -104,91 +124,114 @@
 			transition:slide={{ duration: 300 }}
 			class="presence-activity mt-1 flex flex-col gap-3 border-t border-[var(--line)] pt-3 text-xs text-[var(--ink-muted)]"
 		>
-			{#each activities as activity (activity.id)}
-				<div class="flex min-w-0 items-center gap-3">
-					<div
-						class="relative flex w-[38px] shrink-0 items-center justify-center"
-						class:h-[38px]={activity.kind !== 'crunchyroll'}
-					>
-						{#if activity.kind === 'spotify'}
-							<svg class="absolute inset-0 h-full w-full -rotate-90" viewBox="0 0 100 100">
-								<circle
-									cx="50"
-									cy="50"
-									r="46"
-									fill="none"
-									class="stroke-[#302b30]/10 dark:stroke-zinc-700/30"
-									stroke-width="6"
-								/>
-								<circle
-									cx="50"
-									cy="50"
-									r="46"
-									fill="none"
-									class="stroke-[#1db954]"
-									stroke-width="6"
-									stroke-dasharray="289.03"
-									stroke-dashoffset={289.03 - 289.03 * progress}
-									stroke-linecap="round"
-								/>
-							</svg>
-						{/if}
-
-						{#key `${activity.imageUrl}-${activity.fallbackImageUrl}`}
-							<ActivityImage
-								src={activity.imageUrl}
-								fallbackSrc={activity.fallbackImageUrl}
-								alt={activity.imageAlt}
-								initials={getFallbackInitials(activity)}
-								spotify={activity.kind === 'spotify'}
-								poster={activity.kind === 'crunchyroll'}
-							/>
-						{/key}
-					</div>
-
-					<div class="flex min-w-0 flex-col">
-						<span
-							class={activity.kind === 'spotify'
-								? 'text-[9px] font-semibold tracking-wider text-[#1db954] uppercase'
-								: activity.kind === 'crunchyroll'
-									? 'text-[9px] font-semibold tracking-wider text-[var(--accent)] uppercase'
-									: 'text-[9px] font-semibold tracking-wider text-[#68b78d] uppercase'}
+			{#each activities as activity (activity.kind === 'spotify' ? 'spotify' : activity.id)}
+				<div class="flex min-w-0 flex-col gap-2">
+					<div class="flex min-w-0 items-center gap-3">
+						<div
+							class="relative flex w-[38px] shrink-0 items-center justify-center"
+							class:h-[38px]={activity.kind !== 'crunchyroll'}
 						>
-							{activity.label}
-						</span>
+							{#if activity.kind === 'spotify'}
+								<svg class="absolute inset-0 h-full w-full -rotate-90" viewBox="0 0 100 100">
+									<circle
+										cx="50"
+										cy="50"
+										r="46"
+										fill="none"
+										class="stroke-[#302b30]/10 dark:stroke-zinc-700/30"
+										stroke-width="6"
+									/>
+									<circle
+										cx="50"
+										cy="50"
+										r="46"
+										fill="none"
+										class="spotify-ring-progress stroke-[#1db954]"
+										stroke-width="6"
+										stroke-dasharray="289.03"
+										stroke-dashoffset={289.03 - 289.03 * progress}
+										stroke-linecap="round"
+									/>
+								</svg>
+							{/if}
 
-						{#if activity.href}
-							<a
-								href={activity.href}
-								target="_blank"
-								rel="noopener noreferrer"
-								class="truncate text-xs font-semibold text-[var(--ink)] transition-colors hover:text-[#1db954] hover:underline dark:hover:text-[#1db954]"
-							>
-								{activity.title}
-							</a>
-						{:else}
-							<span
-								class={activity.kind === 'crunchyroll'
-									? 'text-xs font-semibold break-words text-[var(--ink)]'
-									: 'truncate text-xs font-semibold text-[var(--ink)]'}
-							>
-								{activity.title}
-							</span>
-						{/if}
+							{#key `${activity.id}-${activity.imageUrl}-${activity.fallbackImageUrl}`}
+								<ActivityImage
+									transition:fade={{ duration: 240 }}
+									src={activity.imageUrl}
+									fallbackSrc={activity.fallbackImageUrl}
+									alt={activity.imageAlt}
+									initials={getFallbackInitials(activity)}
+									spotify={activity.kind === 'spotify'}
+									poster={activity.kind === 'crunchyroll'}
+								/>
+							{/key}
+						</div>
 
-						{#if activity.episode}
-							<span class="text-[11px] font-semibold text-[var(--accent)]">{activity.episode}</span>
-						{/if}
-						{#if activity.subtitle}
+						<div class="flex min-w-0 flex-col">
 							<span
-								class={activity.kind === 'crunchyroll'
-									? 'text-[11px] break-words whitespace-normal text-[var(--ink-muted)]'
-									: 'truncate text-[11px] text-[var(--ink-muted)]'}
+								class={activity.kind === 'spotify'
+									? 'text-[9px] font-semibold tracking-wider text-[#1db954] uppercase'
+									: activity.kind === 'crunchyroll'
+										? 'text-[9px] font-semibold tracking-wider text-[var(--accent)] uppercase'
+										: 'text-[9px] font-semibold tracking-wider text-[#68b78d] uppercase'}
 							>
-								{activity.subtitle}
+								{activity.label}
 							</span>
-						{/if}
+
+							{#if activity.href}
+								<a
+									href={activity.href}
+									target="_blank"
+									rel="noopener noreferrer"
+									class="truncate text-xs font-semibold text-[var(--ink)] transition-colors hover:text-[#1db954] hover:underline dark:hover:text-[#1db954]"
+								>
+									{activity.title}
+								</a>
+							{:else}
+								<span
+									class={activity.kind === 'crunchyroll'
+										? 'text-xs font-semibold break-words text-[var(--ink)]'
+										: 'truncate text-xs font-semibold text-[var(--ink)]'}
+								>
+									{activity.title}
+								</span>
+							{/if}
+
+							{#if activity.episode}
+								<span class="text-[11px] font-semibold text-[var(--accent)]"
+									>{activity.episode}</span
+								>
+							{/if}
+							{#if activity.subtitle}
+								<span
+									class={activity.kind === 'crunchyroll'
+										? 'text-[11px] break-words whitespace-normal text-[var(--ink-muted)]'
+										: 'truncate text-[11px] text-[var(--ink-muted)]'}
+								>
+									{activity.subtitle}
+								</span>
+							{/if}
+						</div>
 					</div>
+					{#if activity.kind === 'spotify' && activity.timestamps}
+						<div class="spotify-timeline" aria-label="Song playback progress">
+							<div
+								class="spotify-timeline-track"
+								role="progressbar"
+								aria-label="Song playback progress"
+								aria-valuemin="0"
+								aria-valuemax={activity.timestamps.end - activity.timestamps.start}
+								aria-valuenow={elapsedMs}
+							>
+								<span class="spotify-timeline-fill" style={`width: ${progress * 100}%`}></span>
+							</div>
+							<div class="spotify-timeline-times" aria-hidden="true">
+								<span>{formatTime(elapsedMs)}</span>
+								<span>{formatTime(activity.timestamps.end - activity.timestamps.start)}</span>
+							</div>
+						</div>
+					{/if}
 				</div>
 			{/each}
 		</div>
@@ -196,6 +239,41 @@
 </div>
 
 <style>
+	.spotify-timeline {
+		display: flex;
+		flex-direction: column;
+		gap: 3px;
+		padding-left: 50px;
+	}
+	.spotify-timeline-track {
+		height: 3px;
+		overflow: hidden;
+		border-radius: 999px;
+		background: color-mix(in srgb, var(--ink-muted) 24%, transparent);
+	}
+	.spotify-timeline-fill {
+		display: block;
+		height: 100%;
+		border-radius: inherit;
+		background: #1db954;
+		transition: width 1000ms linear;
+	}
+	.spotify-ring-progress {
+		transition: stroke-dashoffset 1000ms linear;
+	}
+	.spotify-timeline-times {
+		display: flex;
+		justify-content: space-between;
+		font-size: 9px;
+		line-height: 1.2;
+		font-variant-numeric: tabular-nums;
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.spotify-timeline-fill,
+		.spotify-ring-progress {
+			transition: none;
+		}
+	}
 	@media (max-width: 1023px) {
 		.presence-card {
 			padding: 14px 18px;
