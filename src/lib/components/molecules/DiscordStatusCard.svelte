@@ -13,49 +13,45 @@
 	} = $props();
 
 	let progress = $state(0);
-	let elapsedMs = $state(0);
 	let spotifyActivity = $derived(activities.find((activity) => activity.kind === 'spotify'));
+	let spotifyTrackId = $derived(spotifyActivity?.id);
 	let spotifyStart = $derived(spotifyActivity?.timestamps?.start);
 	let spotifyEnd = $derived(spotifyActivity?.timestamps?.end);
+	let previousTrackId: string | undefined;
 
 	$effect(() => {
+		const trackId = spotifyTrackId;
 		const start = spotifyStart;
 		const end = spotifyEnd;
-		if (start === undefined || end === undefined) {
+		if (!trackId || start === undefined || end === undefined) {
 			progress = 0;
-			elapsedMs = 0;
+			previousTrackId = undefined;
 			return;
 		}
-		// A new track gets a fresh timeline; populate its live position next frame.
-		progress = 0;
-		elapsedMs = 0;
+
+		// Reset only for a new song. Seeking within the current song animates to its new position.
+		if (trackId !== previousTrackId) progress = 0;
+		previousTrackId = trackId;
 
 		const updateProgress = () => {
 			const total = end - start;
 			if (!Number.isFinite(start) || !Number.isFinite(end) || total <= 0) {
-				elapsedMs = 0;
 				progress = 0;
 				return;
 			}
 
 			const current = Math.min(Math.max(Date.now() - start, 0), total);
-			elapsedMs = current;
 			progress = current / total;
 		};
 
 		const frameId = window.requestAnimationFrame(updateProgress);
-		const timerId = window.setInterval(updateProgress, 1000);
+		const timerId = window.setInterval(updateProgress, 250);
 
 		return () => {
 			window.cancelAnimationFrame(frameId);
 			window.clearInterval(timerId);
 		};
 	});
-
-	function formatTime(milliseconds: number) {
-		const seconds = Math.floor(Math.max(0, milliseconds) / 1000);
-		return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
-	}
 
 	function getFallbackInitials(activity: PresenceActivityInfo) {
 		if (activity.kind === 'crunchyroll') return 'CR';
@@ -125,113 +121,91 @@
 			class="presence-activity mt-1 flex flex-col gap-3 border-t border-[var(--line)] pt-3 text-xs text-[var(--ink-muted)]"
 		>
 			{#each activities as activity (activity.kind === 'spotify' ? 'spotify' : activity.id)}
-				<div class="flex min-w-0 flex-col gap-2">
-					<div class="flex min-w-0 items-center gap-3">
-						<div
-							class="relative flex w-[38px] shrink-0 items-center justify-center"
-							class:h-[38px]={activity.kind !== 'crunchyroll'}
-						>
-							{#if activity.kind === 'spotify'}
-								<svg class="absolute inset-0 h-full w-full -rotate-90" viewBox="0 0 100 100">
-									<circle
-										cx="50"
-										cy="50"
-										r="46"
-										fill="none"
-										class="stroke-[#302b30]/10 dark:stroke-zinc-700/30"
-										stroke-width="6"
-									/>
-									<circle
-										cx="50"
-										cy="50"
-										r="46"
-										fill="none"
-										class="spotify-ring-progress stroke-[#1db954]"
-										stroke-width="6"
-										stroke-dasharray="289.03"
-										stroke-dashoffset={289.03 - 289.03 * progress}
-										stroke-linecap="round"
-									/>
-								</svg>
-							{/if}
-
-							{#key `${activity.id}-${activity.imageUrl}-${activity.fallbackImageUrl}`}
-								<ActivityImage
-									transition:fade={{ duration: 240 }}
-									src={activity.imageUrl}
-									fallbackSrc={activity.fallbackImageUrl}
-									alt={activity.imageAlt}
-									initials={getFallbackInitials(activity)}
-									spotify={activity.kind === 'spotify'}
-									poster={activity.kind === 'crunchyroll'}
+				<div class="flex min-w-0 items-center gap-3">
+					<div
+						class="relative flex w-[38px] shrink-0 items-center justify-center"
+						class:h-[38px]={activity.kind !== 'crunchyroll'}
+					>
+						{#if activity.kind === 'spotify'}
+							<svg class="absolute inset-0 h-full w-full -rotate-90" viewBox="0 0 100 100">
+								<circle
+									cx="50"
+									cy="50"
+									r="46"
+									fill="none"
+									class="stroke-[#302b30]/10 dark:stroke-zinc-700/30"
+									stroke-width="6"
 								/>
-							{/key}
-						</div>
+								<circle
+									cx="50"
+									cy="50"
+									r="46"
+									fill="none"
+									class="spotify-ring-progress stroke-[#1db954]"
+									stroke-width="6"
+									stroke-dasharray="289.03"
+									stroke-dashoffset={289.03 - 289.03 * progress}
+									stroke-linecap="round"
+								/>
+							</svg>
+						{/if}
 
-						<div class="flex min-w-0 flex-col">
-							<span
-								class={activity.kind === 'spotify'
-									? 'text-[9px] font-semibold tracking-wider text-[#1db954] uppercase'
-									: activity.kind === 'crunchyroll'
-										? 'text-[9px] font-semibold tracking-wider text-[var(--accent)] uppercase'
-										: 'text-[9px] font-semibold tracking-wider text-[#68b78d] uppercase'}
-							>
-								{activity.label}
-							</span>
-
-							{#if activity.href}
-								<a
-									href={activity.href}
-									target="_blank"
-									rel="noopener noreferrer"
-									class="truncate text-xs font-semibold text-[var(--ink)] transition-colors hover:text-[#1db954] hover:underline dark:hover:text-[#1db954]"
-								>
-									{activity.title}
-								</a>
-							{:else}
-								<span
-									class={activity.kind === 'crunchyroll'
-										? 'text-xs font-semibold break-words text-[var(--ink)]'
-										: 'truncate text-xs font-semibold text-[var(--ink)]'}
-								>
-									{activity.title}
-								</span>
-							{/if}
-
-							{#if activity.episode}
-								<span class="text-[11px] font-semibold text-[var(--accent)]"
-									>{activity.episode}</span
-								>
-							{/if}
-							{#if activity.subtitle}
-								<span
-									class={activity.kind === 'crunchyroll'
-										? 'text-[11px] break-words whitespace-normal text-[var(--ink-muted)]'
-										: 'truncate text-[11px] text-[var(--ink-muted)]'}
-								>
-									{activity.subtitle}
-								</span>
-							{/if}
-						</div>
+						{#key `${activity.id}-${activity.imageUrl}-${activity.fallbackImageUrl}`}
+							<ActivityImage
+								transition:fade={{ duration: 240 }}
+								src={activity.imageUrl}
+								fallbackSrc={activity.fallbackImageUrl}
+								alt={activity.imageAlt}
+								initials={getFallbackInitials(activity)}
+								spotify={activity.kind === 'spotify'}
+								poster={activity.kind === 'crunchyroll'}
+							/>
+						{/key}
 					</div>
-					{#if activity.kind === 'spotify' && activity.timestamps}
-						<div class="spotify-timeline" aria-label="Song playback progress">
-							<div
-								class="spotify-timeline-track"
-								role="progressbar"
-								aria-label="Song playback progress"
-								aria-valuemin="0"
-								aria-valuemax={activity.timestamps.end - activity.timestamps.start}
-								aria-valuenow={elapsedMs}
+
+					<div class="flex min-w-0 flex-col">
+						<span
+							class={activity.kind === 'spotify'
+								? 'text-[9px] font-semibold tracking-wider text-[#1db954] uppercase'
+								: activity.kind === 'crunchyroll'
+									? 'text-[9px] font-semibold tracking-wider text-[var(--accent)] uppercase'
+									: 'text-[9px] font-semibold tracking-wider text-[#68b78d] uppercase'}
+						>
+							{activity.label}
+						</span>
+
+						{#if activity.href}
+							<a
+								href={activity.href}
+								target="_blank"
+								rel="noopener noreferrer"
+								class="truncate text-xs font-semibold text-[var(--ink)] transition-colors hover:text-[#1db954] hover:underline dark:hover:text-[#1db954]"
 							>
-								<span class="spotify-timeline-fill" style={`width: ${progress * 100}%`}></span>
-							</div>
-							<div class="spotify-timeline-times" aria-hidden="true">
-								<span>{formatTime(elapsedMs)}</span>
-								<span>{formatTime(activity.timestamps.end - activity.timestamps.start)}</span>
-							</div>
-						</div>
-					{/if}
+								{activity.title}
+							</a>
+						{:else}
+							<span
+								class={activity.kind === 'crunchyroll'
+									? 'text-xs font-semibold break-words text-[var(--ink)]'
+									: 'truncate text-xs font-semibold text-[var(--ink)]'}
+							>
+								{activity.title}
+							</span>
+						{/if}
+
+						{#if activity.episode}
+							<span class="text-[11px] font-semibold text-[var(--accent)]">{activity.episode}</span>
+						{/if}
+						{#if activity.subtitle}
+							<span
+								class={activity.kind === 'crunchyroll'
+									? 'text-[11px] break-words whitespace-normal text-[var(--ink-muted)]'
+									: 'truncate text-[11px] text-[var(--ink-muted)]'}
+							>
+								{activity.subtitle}
+							</span>
+						{/if}
+					</div>
 				</div>
 			{/each}
 		</div>
@@ -239,37 +213,10 @@
 </div>
 
 <style>
-	.spotify-timeline {
-		display: flex;
-		flex-direction: column;
-		gap: 3px;
-		padding-left: 50px;
-	}
-	.spotify-timeline-track {
-		height: 3px;
-		overflow: hidden;
-		border-radius: 999px;
-		background: color-mix(in srgb, var(--ink-muted) 24%, transparent);
-	}
-	.spotify-timeline-fill {
-		display: block;
-		height: 100%;
-		border-radius: inherit;
-		background: #1db954;
-		transition: width 1000ms linear;
-	}
 	.spotify-ring-progress {
-		transition: stroke-dashoffset 1000ms linear;
-	}
-	.spotify-timeline-times {
-		display: flex;
-		justify-content: space-between;
-		font-size: 9px;
-		line-height: 1.2;
-		font-variant-numeric: tabular-nums;
+		transition: stroke-dashoffset 250ms linear;
 	}
 	@media (prefers-reduced-motion: reduce) {
-		.spotify-timeline-fill,
 		.spotify-ring-progress {
 			transition: none;
 		}
