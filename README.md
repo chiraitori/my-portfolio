@@ -29,7 +29,7 @@ With the local dev server, use `/?season=christmas`, `/?season=new-year`, or `/?
 
 ## External data
 
-Pinned projects are fetched from `gh.chiraitori.dev`. Discord presence uses the Lanyard WebSocket. Viewer counts use the `/api/viewers` route and the D1 database bound as `DB` in `wrangler.toml`.
+Pinned projects are fetched from `gh.chiraitori.dev`. Discord presence uses Goyard's WebSocket, with Lanyard as a fallback. Viewer counts use the `/api/viewers` route and the D1 database bound as `DB` in `wrangler.toml`.
 
 For local analytics, run `npm run db:migrate:local`. When setting up a new Cloudflare Pages environment, configure its D1 `DB` binding and run `npm run db:migrate:remote` for the production schema.
 

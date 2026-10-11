@@ -47,8 +47,12 @@
 	let presenceUnavailable = $state(false);
 
 	onMount(() => {
-		const lanyardUrl = 'wss://api.lanyard.rest/socket';
+		const presenceSockets = [
+			'wss://goyard.chiraitori.dev/socket',
+			'wss://api.lanyard.rest/socket'
+		];
 		const discordUserId = '685716988471148552';
+		let endpointIndex = 0;
 		let socket: WebSocket | null = null;
 		let disposed = false;
 		let pageFrozen = false;
@@ -145,10 +149,11 @@
 				return;
 			}
 
-			const nextSocket = new WebSocket(lanyardUrl);
+			const nextSocket = new WebSocket(presenceSockets[endpointIndex]);
+			let receivedPresence = false;
 			socket = nextSocket;
 			connectionTimeout = window.setTimeout(() => {
-				if (socket === nextSocket && nextSocket.readyState !== WebSocket.OPEN) nextSocket.close();
+				if (socket === nextSocket && !receivedPresence) nextSocket.close();
 			}, 15_000);
 
 			nextSocket.onmessage = (event) => {
@@ -180,6 +185,7 @@
 
 				const data = getPresenceData(message);
 				if (data) {
+					receivedPresence = true;
 					reconnectAttempts = 0;
 					if (connectionTimeout !== undefined) {
 						window.clearTimeout(connectionTimeout);
@@ -206,6 +212,7 @@
 			nextSocket.onclose = () => {
 				if (socket !== nextSocket) return;
 				socket = null;
+				endpointIndex = (endpointIndex + 1) % presenceSockets.length;
 				clearHeartbeat();
 				if (connectionTimeout !== undefined) {
 					window.clearTimeout(connectionTimeout);
