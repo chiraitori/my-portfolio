@@ -6,13 +6,34 @@
 	import StatusDot from '$lib/components/atoms/StatusDot.svelte';
 	let { status }: { status: StatusInfo } = $props();
 
+	const vietnamDate = new Intl.DateTimeFormat('en-US', {
+		year: 'numeric',
+		month: 'numeric',
+		day: 'numeric',
+		timeZone: 'Asia/Ho_Chi_Minh'
+	});
+
 	let currentTime = $state('00:00:00');
-	let getAge = () => {
-		let birthDate = new Date('2005-10-28');
-		const ageMs = Date.now() - birthDate.getTime();
-		return (ageMs / 31536000000).toFixed(10);
+	const getAge = (date = new Date()) => {
+		const parts = vietnamDate.formatToParts(date);
+		const get = (type: string) => Number(parts.find((part) => part.type === type)?.value);
+		const year = get('year');
+		const month = get('month');
+		const day = get('day');
+
+		let baseAge = year - 2005;
+		const isBeforeBirthday = month < 10 || (month === 10 && day < 28);
+		if (isBeforeBirthday) baseAge -= 1;
+
+		const birthdayYear = isBeforeBirthday ? year - 1 : year;
+		const lastBirthday = Date.UTC(birthdayYear, 9, 28) - 7 * 60 * 60 * 1000;
+		const nextBirthday = Date.UTC(birthdayYear + 1, 9, 28) - 7 * 60 * 60 * 1000;
+
+		const fraction = (date.getTime() - lastBirthday) / (nextBirthday - lastBirthday);
+		return (baseAge + fraction).toFixed(10);
 	};
 	let age = $state(getAge());
+	let ageYears = $derived(Math.floor(Number(age)));
 
 	onMount(() => {
 		// Clock & Age interval
@@ -99,7 +120,7 @@
 		>
 			<p class="text-left">
 				Hey there, I'm Chiraitori or (Tú) :] I'm a
-				<Tooltip tip={age}><span class="about-tag">20</span></Tooltip>
+				<Tooltip tip={age}><span class="about-tag">{ageYears}</span></Tooltip>
 				year old IoT and AI programmer based in Vietnam. My journey into programming began
 				<Tooltip tip="2018"><span class="about-tag">2018</span></Tooltip>, and I've been deeply
 				involved in the field ever since. While some may find the document about the technology in
